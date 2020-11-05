@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         btn1.setOnClickListener {
             GlobalScope.launchUI {
-                uri = openFile<String>()?.run {
+                uri = openFile<String>(arrayListOf(MimeType.img))?.run {
                     File(this).toUri()
                 }
                 Log.i(TAG, "onCreate: $uri")
