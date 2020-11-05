@@ -17,7 +17,7 @@ allprojects {
 ```
 ```
 dependencies {
-	implementation 'com.github.iDeMonnnnnn:QFsolution:1.0.1'
+	implementation 'com.github.iDeMonnnnnn:QFsolution:1.0.2'
 }
 ```
 #### 添加权限
@@ -29,7 +29,7 @@ dependencies {
 ```
 
 ### 效果动图
-
+![xxx](https://github.com/iDeMonnnnnn/QFsolution/blob/master/ezgif.gif?raw=true)
 ### 使用方法
 
 #### 图片选择器
