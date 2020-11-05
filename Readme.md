@@ -125,6 +125,11 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
 
 如果你有问题或者建议，请[Issues](https://github.com/iDeMonnnnnn/QFsolution/issues)或者Email.
 
+### 致谢
+[Android 10适配要点，作用域存储](https://blog.csdn.net/guolin_blog/article/details/105419420)
+
+[boxing](https://github.com/bilibili/boxing)
+
 ### MIT License
 ```
 Copyright (c) 2020 DeMon
