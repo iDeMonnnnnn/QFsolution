@@ -112,6 +112,7 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
   val file: File? = uri.uriToFile(this@MainActivity)
 ```
 
+
 **更多使用详情，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)及[源码](https://github.com/iDeMonnnnnn/QFsolution/tree/master/solution)**
 
 ### 其他
