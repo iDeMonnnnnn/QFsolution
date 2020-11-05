@@ -29,6 +29,8 @@ dependencies {
 ```
 
 ### 效果动图
+[下载Demo.apk体验](https://github.com/iDeMonnnnnn/QFsolution/raw/master/QFDemo.apk)
+
 ![xxx](https://github.com/iDeMonnnnnn/QFsolution/blob/master/ezgif.gif?raw=true)
 ### 使用方法
 
