@@ -76,7 +76,7 @@ QFHelper.getInstance()
 
 返回值根据泛型类型返回对应类型的结果：Uri：文件的Uri对线，File：文件对象，String：文件的绝对路径。
 
-更多使用细节，可见源码注释，写的很详细。
+更多使用细节，可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
 
 1.系统文件选择
 ```

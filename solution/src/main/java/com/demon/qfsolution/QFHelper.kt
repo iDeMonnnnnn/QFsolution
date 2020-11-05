@@ -79,7 +79,7 @@ class QFHelper {
      */
     fun start(activity: FragmentActivity, requestCode: Int) {
         if (maxNum < 1) {
-            Toast.makeText(activity, context.getString(R.string.less_one), Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, activity.getString(R.string.less_one), Toast.LENGTH_LONG).show()
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
