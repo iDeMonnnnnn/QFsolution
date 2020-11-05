@@ -37,7 +37,7 @@ import java.net.URLConnection
  * String：图片的绝对路径
  *
  * @param isSave 是否保存至相册，默认true
- * @param fileName 文件名，默认为空 取时间戳.jpg
+ * @param fileName 拍照后的文件名，默认为空 取时间戳.jpg
  */
 suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean = true, fileName: String? = null): T? {
     return suspendCancellableCoroutine { continuation ->

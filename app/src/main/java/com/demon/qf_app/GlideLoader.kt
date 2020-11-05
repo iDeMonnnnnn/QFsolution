@@ -15,6 +15,11 @@ import com.demon.qfsolution.loader.IQFImgLoader
  * Desc:
  */
 class GlideLoader : IQFImgLoader {
+
+    /**
+     * 图片显示在表格选择器中的缩略图，因此此处尽量应该显示缩略图，以保证选择图片时的流畅不至于卡顿
+     * 例如Glide中的thumbnail方法
+     */
     override fun displayThumbnail(img: ImageView, uri: Uri) {
         val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).centerCrop()
         //thumbnail缩略图

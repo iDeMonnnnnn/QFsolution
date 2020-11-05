@@ -78,6 +78,10 @@ class QFHelper {
      * AppCompatActivity中启动图片选择
      */
     fun start(activity: FragmentActivity, requestCode: Int) {
+        if (maxNum < 1) {
+            Toast.makeText(activity, context.getString(R.string.less_one), Toast.LENGTH_LONG).show()
+            return
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 || activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED

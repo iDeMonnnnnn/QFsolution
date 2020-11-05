@@ -50,15 +50,18 @@ class MainActivity : AppCompatActivity() {
         }
         btn2.setOnClickListener {
             GlobalScope.launchUI {
-                uri = gotoCamera<Uri>(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
+                uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
-                uri.uriToFile(this)
+                val file: File? = uri.uriToFile(this@MainActivity)
                 img.setImageURI(uri)
             }
         }
         btn3.setOnClickListener {
             QFHelper.getInstance()
                 .isNeedGif(false)
+                .isNeedCamera(true)
+                .setSpanCount(3)
+                .setLoadNum(30)
                 .setMaxNum(9)
                 .start(this, 0x001)
         }
