@@ -98,7 +98,21 @@ class QFHelper {
      * Fragment中启动图片选择
      */
     fun start(fragment: Fragment, requestCode: Int) {
-        start(fragment.requireActivity(), requestCode)
+        val context = fragment.requireContext()
+        if (maxNum < 1) {
+            Toast.makeText(context, context.getString(R.string.less_one), Toast.LENGTH_LONG).show()
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(context, context.getString(R.string.qf_storage_permission), Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+        val intent = Intent(context, QFImgsActivity::class.java)
+        fragment.startActivityForResult(intent, requestCode)
     }
 
 
@@ -114,7 +128,9 @@ class QFHelper {
 
 
     fun startImgBrowse(fragment: Fragment, uri: Uri, requestCode: Int = EXTRA_RC_IB) {
-        startImgBrowse(fragment.requireActivity(), uri, requestCode)
+        val intent = Intent(fragment.requireContext(), QFBigImgActivity::class.java)
+        intent.putExtra(EXTRA_IMG, uri)
+        fragment.startActivityForResult(intent, requestCode)
     }
 
     /**
