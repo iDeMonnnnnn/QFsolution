@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QFsolution</string>
+    <string name="qf_pick_photo">Select Image</string>
+    <string name="qf_ok_value">(%1$d/%2$d)Confirm</string>
+    <string name="qf_ok">Confirm</string>
+    <string name="qf_camera_permission">Please apply for camera permission first!</string>
+    <string name="qf_last_one">Please select at least one picture!</string>
+    <string name="qf_no_more">Cannot select more pictures!</string>
+    <string name="qf_storage_permission">Please apply for storage permission first!</string>
+</resources>

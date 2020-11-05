@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.demon.qfsolution">
+
+    <application>
+        <activity
+            android:name="com.demon.qfsolution.activity.QFImgsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/QF.AppTheme" />
+        <activity
+            android:name="com.demon.qfsolution.activity.QFBigImgActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/QF.AppTheme" />
+    </application>
+
+</manifest>

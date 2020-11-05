@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="QF.AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/qf_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/qf_colorPrimaryDark</item>
+        <item name="colorAccent">@color/qf_colorAccent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
+
+    <style name="Boxing.ToolbarTheme" parent="QF.AppTheme" >
+        <item name="titleTextColor">@color/qf_white</item>
+        <item name="android:textColorSecondary">@color/qf_white</item>
+        <item name="android:textColor">@color/qf_white</item>
+        <item name="android:background">@color/qf_colorPrimaryDark</item>
+    </style>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qf_colorPrimary">#000000</color>
+    <color name="qf_colorPrimaryDark">#ff212121</color>
+    <color name="qf_colorPrimaryAlpha">#44000000</color>
+    <color name="qf_colorAccent">#4CAF50</color>
+
+
+    <color name="qf_gray">#999999</color>
+    <color name="qf_gray1">#333333</color>
+
+    <color name="qf_white">#ffffff</color>
+    <color name="qf_white1">#fafafa</color>
+    <color name="qf_white2">#eaeaea</color>
+
+    <color name="qf_black">#000000</color>
+    <color name="qf_black1">#1b1b1b</color>
+    <color name="qf_black_alpha15">#26000000</color>
+    <color name="qf_black_alpha20">#33000000</color>
+    <color name="qf_black_alpha25">#3c000000</color>
+</resources>
