@@ -1,5 +1,7 @@
 # QFsolution
 
+[![](https://jitpack.io/v/iDeMonnnnnn/QFsolution.svg)](https://jitpack.io/#iDeMonnnnnn/QFsolution)
+
   适用于AndroidQ的文件操作解决方案。
 
    1. 基于协程的文件选择，系统拍照，系统裁剪。
