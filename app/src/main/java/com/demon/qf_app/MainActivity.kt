@@ -7,14 +7,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.demon.qfsolution.QFHelper
 import com.demon.qfsolution.loader.QFImgLoader
-import com.demon.qfsolution.utils.gotoCamera
-import com.demon.qfsolution.utils.openFile
-import com.demon.qfsolution.utils.startCrop
-import com.demon.qfsolution.utils.uriToFile
+import com.demon.qfsolution.utils.*
 import com.permissionx.guolindev.PermissionX
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
