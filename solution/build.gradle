@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-android-extensions'
     id 'com.github.dcendents.android-maven'
 }
-group='com.github.iDeMonnnnnn'
+group = 'com.github.iDeMonnnnnn'
 
 android {
     compileSdkVersion androidTargetVersion
@@ -35,6 +35,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation('com.github.chrisbanes:PhotoView:2.3.0') {
-        exclude group: 'androidx.appcompat', module: 'appcompat'
+        exclude group: 'androidx.appcompat'
     }
 }
