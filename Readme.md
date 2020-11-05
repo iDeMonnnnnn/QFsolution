@@ -17,7 +17,7 @@ allprojects {
 ```
 ```
 dependencies {
-	implementation 'com.github.iDeMonnnnnn:QFsolution:$latest version'
+	implementation 'com.github.iDeMonnnnnn:QFsolution:$latest_version'
 }
 ```
 #### 添加权限
