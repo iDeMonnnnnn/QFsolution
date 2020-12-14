@@ -429,23 +429,10 @@ fun Uri?.getDataColumn(context: Context): String? {
 }
 
 /**
- * 根据文件名获取MimeType
- */
-fun String.getMimeTypeByFileName(): String =
-    URLConnection.getFileNameMap().getContentTypeFor(this)
-
-/**
- * 根据MimeType获取拓展名
- */
-fun String.getExtensionByMimeType() =
-    MimeTypeMap.getSingleton().getExtensionFromMimeType(this)
-
-/**
  * 根据Uri获取MimeType
  */
 fun Uri.getMimeTypeByUri(context: Context) =
     context.contentResolver.getType(this)
-
 
 /**
  * 根据Uri获取扩展名
@@ -459,6 +446,17 @@ fun Uri.getExtensionByUri(context: Context) =
 fun String.getExtensionByFileName() =
     this.getMimeTypeByFileName().getExtensionByMimeType()
 
+/**
+ * 根据文件名获取MimeType
+ */
+fun String.getMimeTypeByFileName(): String =
+    URLConnection.getFileNameMap().getContentTypeFor(this)
+
+/**
+ * 根据MimeType获取拓展名
+ */
+fun String.getExtensionByMimeType() =
+    MimeTypeMap.getSingleton().getExtensionFromMimeType(this)
 
 /**
  * 将图片保存至相册，兼容AndroidQ
@@ -498,7 +496,7 @@ fun File?.saveToAlbum(context: Context): Boolean {
 }
 
 /**
- * 判断公有目录文件是否存在，自Android Q开始，公有目录File API都失效，不能直接通过new File(path).exists();判断公有目录文件是否存在
+ * 判断公有目录文件否存在，自Android Q开始，公有目录File API都失效，不能直接通过new File(path).exists();判断公有目录文件是否存在
  */
 fun Uri?.isFileExists(context: Context): Boolean {
     if (this == null) return false
@@ -511,19 +509,5 @@ fun Uri?.isFileExists(context: Context): Boolean {
         false
     } finally {
         afd?.close()
-    }
-}
-
-fun Uri?.grantPermissions(context: Context, intent: Intent, writeAble: Boolean = false) {
-    this ?: return
-    var flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
-    if (writeAble) {
-        flag = flag or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    }
-    intent.addFlags(flag)
-    val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-    for (resolveInfo in resInfoList) {
-        val packageName = resolveInfo.activityInfo.packageName
-        context.grantUriPermission(packageName, this, flag)
     }
 }

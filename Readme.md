@@ -2,9 +2,11 @@
 
 [![](https://jitpack.io/v/iDeMonnnnnn/QFsolution.svg)](https://jitpack.io/#iDeMonnnnnn/QFsolution)
 
-1. 适用于AndroidQ的简易图片选择器。
-2. 基于协程的系统文件选择，系统拍照，系统裁剪。
-3. Uri转为File的究极解决方案。
+1. **适用于AndroidQ的简易图片选择器。**
+2. **基于协程的系统文件选择，系统拍照，系统裁剪。**
+3. **Uri转为File的究极解决方案。**
+
+**[文档WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
 
 ### 开始使用
 #### 添加依赖
@@ -15,6 +17,8 @@ allprojects {
     }
 }
 ```
+
+[latest_version](https://github.com/iDeMonnnnnn/QFsolution/releases)
 ```
 dependencies {
 	implementation 'com.github.iDeMonnnnnn:QFsolution:$latest_version'
@@ -24,6 +28,7 @@ dependencies {
 ```
     <!--如果你使用相机相关功能必须要添加，否则可忽略-->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!--存储权限在低于AndroidQ的手机上还是需要的-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
@@ -74,9 +79,9 @@ QFHelper.getInstance()
 ```
 
 #### 文件操作
-本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。都是基于携程+GhostFragment的方式，因此需要在协程中使用，操作完成后可直接获取到返回值。
+本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。都是基于**携程+GhostFragment**的方式，因此需要在**协程**中使用，操作完成后可直接获取到返回值。
 
-返回值根据泛型类型返回对应类型的结果：Uri：文件的Uri对线，File：文件对象，String：文件的绝对路径。
+返回值根据泛型类型返回对应类型的结果：Uri：文件的Uri对象，File：文件对象，String：文件的绝对路径。
 
 更多使用细节，可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
 
@@ -119,7 +124,7 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
 ```
 
 
-**更多使用详情，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)及[源码](https://github.com/iDeMonnnnnn/QFsolution/tree/master/solution)**
+**更多使用详情，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)及[WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
 
 ### 其他
 
