@@ -11,7 +11,7 @@ import androidx.annotation.NonNull
  * Desc:
  */
 class QFImgLoader : IQFImgLoader {
-    lateinit var loader: IQFImgLoader
+    private var loader: IQFImgLoader? = null
 
     fun init(@NonNull loader: IQFImgLoader) {
         this.loader = loader
@@ -19,15 +19,15 @@ class QFImgLoader : IQFImgLoader {
 
 
     override fun displayThumbnail(img: ImageView, uri: Uri) {
-        loader.displayThumbnail(img, uri)
+        loader?.displayThumbnail(img, uri)
     }
 
     override fun displayImgString(img: ImageView, str: String) {
-        loader.displayImgString(img, str)
+        loader?.displayImgString(img, str)
     }
 
     override fun displayImgUri(img: ImageView, uri: Uri) {
-        loader.displayImgUri(img, uri)
+        loader?.displayImgUri(img, uri)
     }
 
     companion object {
