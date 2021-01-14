@@ -151,14 +151,14 @@ suspend inline fun <reified T : Any> Fragment.openFile(mimeTypes: List<MimeType>
 }
 
 /**
- * Activity中使用原生裁剪
+ * Activity中使用原生比例裁剪
  * @param uri content://URI格式的Uri文件
  * @param width 宽，用于计算裁剪比例
  * @param height 高，用于计算裁剪比例
  * @param isSave 是否保存至相册，默认true
  * @param fileName 裁剪后的文件名，默认为空 取时间戳.png
  */
-suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width: Int = 500, height: Int = 500, isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width: Int, height: Int, isSave: Boolean = true, fileName: String? = null): T? {
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.png"
@@ -175,12 +175,14 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
             intentCrop.putExtra("crop", "true")
             //裁剪时是否保留图片的比例
             intentCrop.putExtra("scale", true)
-            // aspectX aspectY 是宽高的比例
-            intentCrop.putExtra("aspectX", width)
-            intentCrop.putExtra("aspectY", height)
-            // outputX outputY 是裁剪图片宽高
-            intentCrop.putExtra("outputX", width)
-            intentCrop.putExtra("outputY", height)
+            if (width != -1 && height != -1) {
+                // aspectX aspectY 是宽高的比例
+                intentCrop.putExtra("aspectX", width)
+                intentCrop.putExtra("aspectY", height)
+                // outputX outputY 是裁剪图片宽高
+                intentCrop.putExtra("outputX", width)
+                intentCrop.putExtra("outputY", height)
+            }
             //是否将数据保留在Bitmap中返回
             intentCrop.putExtra("return-data", false)
             //关闭人脸识别
@@ -197,7 +199,8 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
                         continuation.resumeWith(Result.success(file as T))
                     }
                     Uri::class.java -> {
-                        continuation.resumeWith(Result.success(crop_uri as T))
+                        val result_uri = file.getFileUri(this)
+                        continuation.resumeWith(Result.success(result_uri as T))
                     }
                     String::class.java -> {
                         continuation.resumeWith(Result.success(file.absolutePath as T))
@@ -217,9 +220,27 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
     }
 }
 
-suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, width: Int = 500, height: Int = 500, isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, width: Int, height: Int, isSave: Boolean = true, fileName: String? = null): T? {
     val activity = requireActivity()
     return activity.startCrop<T>(uri, width, height, isSave, fileName)
+}
+
+/**
+ * Activity中使用原生自由裁剪
+ * width&height同时设置为-1，则是自由裁剪
+ * @param uri content://URI格式的Uri文件
+ * @param width 宽，用于计算裁剪比例
+ * @param height 高，用于计算裁剪比例
+ * @param isSave 是否保存至相册，默认true
+ * @param fileName 裁剪后的文件名，默认为空 取时间戳.png
+ */
+suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, isSave: Boolean = true, fileName: String? = null): T? {
+    return startCrop<T>(uri, -1, -1, isSave, fileName)
+}
+
+suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, isSave: Boolean = true, fileName: String? = null): T? {
+    val activity = requireActivity()
+    return activity.startCrop<T>(uri, isSave, fileName)
 }
 
 
@@ -265,7 +286,7 @@ fun File.getFileUri(context: Context): Uri {
 fun Uri.saveFileByUri(context: Context): File? {
     try {
         val inputStream = context.contentResolver.openInputStream(this)
-        val file = File(context.getExternalFilesDir("Temp"), "${System.currentTimeMillis()}.${this.getExtensionByUri(context)}")
+        val file = File(context.getExternalFilesDir("Temp"), "${this.authority}_${this.lastPathSegment}.${this.getExtensionByUri(context)}")
         val fos = FileOutputStream(file)
         val bis = BufferedInputStream(inputStream)
         val bos = BufferedOutputStream(fos)
@@ -511,3 +532,24 @@ fun Uri?.isFileExists(context: Context): Boolean {
         afd?.close()
     }
 }
+
+fun Uri?.grantPermissions(context: Context, intent: Intent, writeAble: Boolean = false) {
+    this ?: return
+    var flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
+    if (writeAble) {
+        flag = flag or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+    }
+    intent.addFlags(flag)
+    val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+    for (resolveInfo in resInfoList) {
+        val packageName = resolveInfo.activityInfo.packageName
+        context.grantUriPermission(packageName, this, flag)
+    }
+}
+
+
+/**
+ * 文件是否存在作用域内
+ */
+fun String.isExistScope(context: Context): Boolean =
+    this.contains("/Android/data/${context.packageName}") && File(this).exists()

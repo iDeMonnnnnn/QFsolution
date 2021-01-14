@@ -49,7 +49,7 @@ QFImgLoader.getInstance().init(GlideLoader()) //初始化图片加载器
 ```
 
 2.配置参数，启动图片选择库。
-```
+```js
 QFHelper.getInstance()
                 .isNeedGif(false) //是需要gif，默认false
                 .isNeedCamera(true)  //是否需要拍照选项，默认true
@@ -61,7 +61,7 @@ QFHelper.getInstance()
 
 3.获取选取图片后的结果
 
-```
+```js
  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
@@ -86,7 +86,7 @@ QFHelper.getInstance()
 更多使用细节，可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
 
 1.系统文件选择
-```
+```js
 GlobalScope.launchUI {
 uri = openFile<String>()?.run {  File(this).toUri() }
 img.setImageURI(uri)
@@ -94,7 +94,7 @@ img.setImageURI(uri)
 ```
 
 2.系统拍照
-```
+```js
 GlobalScope.launchUI {
      uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
      img.setImageURI(uri)
@@ -103,7 +103,7 @@ GlobalScope.launchUI {
 
 3.系统裁剪
 
-```
+```js
 GlobalScope.launchUI {
     uri?.run {
               uri = startCrop(this, 300, 600)

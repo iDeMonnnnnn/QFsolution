@@ -66,12 +66,22 @@ class MainActivity : AppCompatActivity() {
         btn4.setOnClickListener {
             GlobalScope.launchUI {
                 uri?.run {
-                    uri = startCrop(this, 300, 600)
+                    uri = startCrop(this, 300, 300)
+                    Log.i(TAG, "startCrop: $uri")
                     img.setImageURI(uri)
                 }
             }
         }
         btn5.setOnClickListener {
+            GlobalScope.launchUI {
+                uri?.run {
+                    uri = startCrop(this)
+                    Log.i(TAG, "startCrop: $uri")
+                    img.setImageURI(uri)
+                }
+            }
+        }
+        btn6.setOnClickListener {
             var fragment = supportFragmentManager.findFragmentByTag(MainFragment::class.java.simpleName)
             if (fragment == null) {
                 fragment = MainFragment()
@@ -90,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                     val uris = QFHelper.getInstance().getResult(data)
                     uris?.run {
                         uri = this[0]
+                        Log.i(TAG, "onActivityResult: $uri")
                         img.setImageURI(uri)
                     }
                 }
