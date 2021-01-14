@@ -25,7 +25,7 @@ dependencies {
 }
 ```
 #### 添加权限
-```
+```xml
     <!--如果你使用相机相关功能必须要添加，否则可忽略-->
     <uses-permission android:name="android.permission.CAMERA" />
     <!--存储权限在低于AndroidQ的手机上还是需要的-->
@@ -128,7 +128,7 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
 
 ### 其他
 
-如果你有问题或者建议，请[Issues](https://github.com/iDeMonnnnnn/QFsolution/issues)或者Email.
+如果你有问题或者建议，请[Issues](https://github.com/iDeMonnnnnn/QFsolution/issues).
 
 ### 致谢
 [Android 10适配要点，作用域存储](https://blog.csdn.net/guolin_blog/article/details/105419420)
