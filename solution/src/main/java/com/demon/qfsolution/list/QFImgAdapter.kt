@@ -11,7 +11,7 @@ import com.demon.qfsolution.QFHelper
 import com.demon.qfsolution.R
 import com.demon.qfsolution.bean.QFImgBean
 import com.demon.qfsolution.loader.QFImgLoader
-import kotlinx.android.synthetic.main.list_qf_img.view.*
+
 
 /**
  * @author DeMon
@@ -24,7 +24,9 @@ class QFImgAdapter constructor(private var imgList: MutableList<QFImgBean>, priv
     val resultList = arrayListOf<Uri>()
 
     class ViewHolder constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
+        val mContext = itemView.context
+        val qf_pick = itemView.findViewById<ImageView>(R.id.qf_pick)
+        val qf_img = itemView.findViewById<ImageView>(R.id.qf_img)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -32,7 +34,7 @@ class QFImgAdapter constructor(private var imgList: MutableList<QFImgBean>, priv
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.run {
+        holder.run {
             val bean = imgList[position]
             if (bean.type == 1 && position == 0) {
                 qf_pick.visibility = View.GONE
@@ -54,7 +56,7 @@ class QFImgAdapter constructor(private var imgList: MutableList<QFImgBean>, priv
                 )
                 qf_pick.setOnClickListener {
                     if (!bean.isSelected && resultList.size >= QFHelper.getInstance().maxNum) {
-                        Toast.makeText(context, context.getString(R.string.qf_no_more), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.qf_no_more), Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
                     if (bean.isSelected) {

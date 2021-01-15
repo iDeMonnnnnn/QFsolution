@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +21,8 @@ import com.demon.qfsolution.list.SpacesItemDecoration
 import com.demon.qfsolution.utils.getExtensionByUri
 import com.demon.qfsolution.utils.gotoCamera
 import com.demon.qfsolution.utils.launchUI
-import kotlinx.android.synthetic.main.activity_qf_imgs.*
 import kotlinx.coroutines.GlobalScope
+
 /**
  * @author DeMon
  * Created on 2020/11/5.
@@ -36,10 +37,13 @@ class QFImgsActivity : AppCompatActivity() {
     private lateinit var adapter: QFImgAdapter
     private var index = 0
 
+    private lateinit var btn_qf_ok: Button
+    private lateinit var rv_imgs: RecyclerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qf_imgs)
-
+        btn_qf_ok = findViewById(R.id.btn_qf_ok)
+        rv_imgs = findViewById(R.id.rv_imgs)
         if (!QFHelper.getInstance().isSinglePick()) {
             btn_qf_ok.text = getString(R.string.qf_ok_value, 0, QFHelper.getInstance().maxNum)
         }

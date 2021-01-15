@@ -11,10 +11,9 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
+import com.demon.qf_app.databinding.ActivityMainBinding
 import com.demon.qfsolution.QFHelper
 import com.demon.qfsolution.utils.*
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import java.io.File
 
@@ -27,10 +26,11 @@ import java.io.File
 class MainFragment : DialogFragment() {
 
     private val TAG = "MainFragment"
-
+    private lateinit var binding: ActivityMainBinding
     var uri: Uri? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.activity_main, container, true)
+        binding = ActivityMainBinding.inflate(layoutInflater,container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -41,23 +41,23 @@ class MainFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        btn1.setOnClickListener {
+        binding.btn1.setOnClickListener {
             GlobalScope.launchUI {
                 uri = openFile<String>(arrayListOf(MimeType.img))?.run {
                     File(this).toUri()
                 }
                 Log.i(TAG, "onCreate: $uri")
-                img.setImageURI(uri)
+                binding.img.setImageURI(uri)
             }
         }
-        btn2.setOnClickListener {
+        binding.btn2.setOnClickListener {
             GlobalScope.launchUI {
                 uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
-                img.setImageURI(uri)
+                binding.img.setImageURI(uri)
             }
         }
-        btn3.setOnClickListener {
+        binding.btn3.setOnClickListener {
             QFHelper.getInstance()
                 .isNeedGif(false)
                 .isNeedCamera(true)
@@ -67,16 +67,24 @@ class MainFragment : DialogFragment() {
                 .start(this, 0x001)
         }
 
-        btn4.setOnClickListener {
+        binding.btn4.setOnClickListener {
             GlobalScope.launchUI {
                 uri?.run {
                     uri = startCrop(this, 300, 600)
-                    img.setImageURI(uri)
+                    binding.img.setImageURI(uri)
                 }
             }
         }
-
-        btn5.visibility = View.GONE
+        binding.btn5.setOnClickListener {
+            GlobalScope.launchUI {
+                uri?.run {
+                    uri = startCrop(this)
+                    Log.i(TAG, "startCrop: $uri")
+                    binding.img.setImageURI(uri)
+                }
+            }
+        }
+        binding.btn6.visibility = View.GONE
     }
 
 
@@ -88,7 +96,7 @@ class MainFragment : DialogFragment() {
                     val uris = QFHelper.getInstance().getResult(data)
                     uris?.run {
                         uri = this[0]
-                        img.setImageURI(uri)
+                        binding.img.setImageURI(uri)
                     }
                 }
             }

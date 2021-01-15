@@ -4,26 +4,27 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import com.demon.qf_app.databinding.ActivityMainBinding
 import com.demon.qfsolution.QFHelper
 import com.demon.qfsolution.loader.QFImgLoader
 import com.demon.qfsolution.utils.*
 import com.permissionx.guolindev.PermissionX
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     var uri: Uri? = null
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         QFImgLoader.getInstance().init(GlideLoader())
 
@@ -37,23 +38,23 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-        btn1.setOnClickListener {
+        binding.btn1.setOnClickListener {
             GlobalScope.launchUI {
                 uri = openFile<String>(arrayListOf(MimeType.img))?.run {
                     File(this).toUri()
                 }
                 Log.i(TAG, "onCreate: $uri")
-                img.setImageURI(uri)
+                binding.img.setImageURI(uri)
             }
         }
-        btn2.setOnClickListener {
+        binding.btn2.setOnClickListener {
             GlobalScope.launchUI {
                 uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
-                img.setImageURI(uri)
+                binding.img.setImageURI(uri)
             }
         }
-        btn3.setOnClickListener {
+        binding.btn3.setOnClickListener {
             QFHelper.getInstance()
                 .isNeedGif(false)
                 .isNeedCamera(true)
@@ -63,25 +64,25 @@ class MainActivity : AppCompatActivity() {
                 .start(this, 0x001)
         }
 
-        btn4.setOnClickListener {
+        binding.btn4.setOnClickListener {
             GlobalScope.launchUI {
                 uri?.run {
                     uri = startCrop(this, 300, 300)
                     Log.i(TAG, "startCrop: $uri")
-                    img.setImageURI(uri)
+                    binding.img.setImageURI(uri)
                 }
             }
         }
-        btn5.setOnClickListener {
+        binding.btn5.setOnClickListener {
             GlobalScope.launchUI {
                 uri?.run {
                     uri = startCrop(this)
                     Log.i(TAG, "startCrop: $uri")
-                    img.setImageURI(uri)
+                    binding.img.setImageURI(uri)
                 }
             }
         }
-        btn6.setOnClickListener {
+        binding.btn6.setOnClickListener {
             var fragment = supportFragmentManager.findFragmentByTag(MainFragment::class.java.simpleName)
             if (fragment == null) {
                 fragment = MainFragment()
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                     uris?.run {
                         uri = this[0]
                         Log.i(TAG, "onActivityResult: $uri")
-                        img.setImageURI(uri)
+                        binding.img.setImageURI(uri)
                     }
                 }
             }
