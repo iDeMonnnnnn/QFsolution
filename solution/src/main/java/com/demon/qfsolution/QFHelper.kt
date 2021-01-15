@@ -1,6 +1,7 @@
 package com.demon.qfsolution
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -25,6 +26,25 @@ class QFHelper {
     var spanCount = 3
 
     var isNeedCamera = true
+    var authorities: String = "fileProvider"
+    lateinit var mContext: Context
+
+    /**
+     * @param context 提供一个全局的Context
+     * @param authorities 设置FileProvider的authorities,默认"fileProvider"
+     */
+    fun init(context: Context, authorities: String = "fileProvider") {
+        mContext = context
+        this.authorities = authorities
+    }
+
+    /**
+     *设置FileProvider的authorities
+     * 默认"fileProvider"
+     */
+    fun setFileProvider(authorities: String) {
+        this.authorities = authorities
+    }
 
     /**
      * 是否单选

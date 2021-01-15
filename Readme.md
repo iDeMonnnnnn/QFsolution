@@ -39,6 +39,29 @@ dependencies {
 ![xxx](https://github.com/iDeMonnnnnn/QFsolution/blob/master/ezgif.gif?raw=true)
 ### 使用方法
 
+#### FileProvider
+```js
+        /**
+         *考虑到不同项目中FileProvider的authorities可能不一样
+         *因此这里改成可以根据自己项目FileProvider的authorities自由设置
+         *如:android:authorities="${applicationId}.file.provider",你只需要传入“file.provider”即可
+         */
+        QFHelper.getInstance().setFileProvider("file.provider")
+
+```
+
+```xml
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.file.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+```
+
 #### 图片选择器
 
 1.在启动图片选择器之前，你需要初始化图片加载器,你可以参考示例代码的[GlideLoader](https://github.com/iDeMonnnnnn/QFsolution/blob/master/app/src/main/java/com/demon/qf_app/GlideLoader.kt)
@@ -79,7 +102,8 @@ QFHelper.getInstance()
 ```
 
 #### 文件操作
-本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。都是基于**携程+GhostFragment**的方式，因此需要在**协程**中使用，操作完成后可直接获取到返回值。
+本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。
+都是基于**携程+GhostFragment**的方式，因此需要在**协程**中使用，操作完成后可直接获取到返回值。
 
 返回值根据泛型类型返回对应类型的结果：Uri：文件的Uri对象，File：文件对象，String：文件的绝对路径。
 
@@ -129,6 +153,8 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
 ### 其他
 
 如果你有问题或者建议，请[Issues](https://github.com/iDeMonnnnnn/QFsolution/issues).
+
+[基于boxing的AndroidQ适配](https://github.com/iDeMonnnnnn/Qboxing)
 
 ### 致谢
 [Android 10适配要点，作用域存储](https://blog.csdn.net/guolin_blog/article/details/105419420)

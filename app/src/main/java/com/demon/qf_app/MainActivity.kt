@@ -25,6 +25,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        /**
+         *考虑到不同项目中FileProvider的authorities可能不一样
+         *因此这里改成可以根据自己项目FileProvider的authorities自由设置
+         *如:android:authorities="${applicationId}.file.provider",你只需要传入“file.provider”即可
+         */
+        QFHelper.getInstance().setFileProvider("file.provider")
 
         QFImgLoader.getInstance().init(GlideLoader())
 
