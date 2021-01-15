@@ -126,12 +126,23 @@ GlobalScope.launchUI {
 }
 ```
 
-3.系统裁剪
+3.系统比例裁剪
 
-```js
+```
 GlobalScope.launchUI {
     uri?.run {
               uri = startCrop(this, 300, 600)
+              img.setImageURI(uri)
+  }
+}
+```
+
+4.系统自由裁剪
+
+```
+GlobalScope.launchUI {
+    uri?.run {
+              uri = startCrop(this)
               img.setImageURI(uri)
   }
 }
