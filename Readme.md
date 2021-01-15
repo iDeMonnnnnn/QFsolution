@@ -1,4 +1,4 @@
-# QFsolution - 适用于AndroidQ的文件操作解决方案
+## QFsolution - 适用于AndroidQ的文件操作解决方案
 
 [![](https://jitpack.io/v/iDeMonnnnnn/QFsolution.svg)](https://jitpack.io/#iDeMonnnnnn/QFsolution)
 
@@ -103,6 +103,7 @@ QFHelper.getInstance()
 
 #### 文件操作
 本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。
+
 都是基于**携程+GhostFragment**的方式，因此需要在**协程**中使用，操作完成后可直接获取到返回值。
 
 返回值根据泛型类型返回对应类型的结果：Uri：文件的Uri对象，File：文件对象，String：文件的绝对路径。
@@ -137,8 +138,8 @@ GlobalScope.launchUI {
 ```
 
 ### Uri转File
-如何获取```content://URI```格式的Uri文件获取对应的File对象，一直是日常开发中的痛点，网上各种解决方案都不尽人意，本库旨在适配各种可能存在的情况，如果还是获取不到会将该Uri写入沙盒环境，
-再获取对应的File对象，这样基本能100%保证获取到Uri的File对象。
+如何获取```content://URI```格式的Uri文件获取对应的File对象，一直是日常开发中的痛点。
+网上各种解决方案都不尽人意，本库旨在适配各种可能存在的情况，如果还是获取不到会将该Uri写入沙盒环境，再获取对应的File对象，这样基本能100%保证获取到Uri的File对象。
 
 AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只能通过Uri去访问文件，因此访问外部存储文件只能，按照如上方法通过将Uri写入沙盒环境成新文件，再获取File。
 
