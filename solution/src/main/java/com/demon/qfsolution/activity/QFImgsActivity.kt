@@ -9,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.TextUtils
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,8 +22,10 @@ import com.demon.qfsolution.list.HackyGridLayoutManager
 import com.demon.qfsolution.list.SpacesItemDecoration
 import com.demon.qfsolution.utils.getExtensionByUri
 import com.demon.qfsolution.utils.gotoCamera
+import com.demon.qfsolution.utils.isFileExists
 import com.demon.qfsolution.utils.launchUI
 import kotlinx.coroutines.GlobalScope
+import java.io.File
 
 /**
  * @author DeMon
@@ -30,7 +34,7 @@ import kotlinx.coroutines.GlobalScope
  * Desc: 图片选择器
  */
 class QFImgsActivity : AppCompatActivity() {
-
+    private val TAG = "QFImgsActivity"
     private val imgList = arrayListOf<QFImgBean>()
     private var cursor: Cursor? = null
     private var hasImgs = true
@@ -111,13 +115,18 @@ class QFImgsActivity : AppCompatActivity() {
         index = 0
         cursor?.run {
             while (moveToNext() && index <= QFHelper.getInstance().loadNum) {
-                val id = getLong(getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
-                val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                if (!QFHelper.getInstance().isNeedGif && uri.getExtensionByUri(this@QFImgsActivity) == "gif") {
-                    continue
+                val picPath = getString(getColumnIndex(MediaStore.Images.Media.DATA)) ?: ""
+                if (TextUtils.isEmpty(picPath) || !File(picPath).exists()) {
+                    Log.i(TAG, "getImgDatas: $picPath no exists")
+                } else {
+                    val id = getLong(getColumnIndexOrThrow(MediaStore.Images.Media._ID))
+                    val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    if (!QFHelper.getInstance().isNeedGif && uri.getExtensionByUri(this@QFImgsActivity) == "gif") {
+                        continue
+                    }
+                    imgList.add(QFImgBean(uri, picPath))
+                    index++
                 }
-                imgList.add(QFImgBean(uri))
-                index++
             }
         }
         if (index < QFHelper.getInstance().loadNum) {

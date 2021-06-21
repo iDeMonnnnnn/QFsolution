@@ -3,6 +3,7 @@ package com.demon.qf_app
 import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.demon.qfsolution.R
@@ -21,18 +22,18 @@ class GlideLoader : IQFImgLoader {
      * 例如Glide中的thumbnail方法
      */
     override fun displayThumbnail(img: ImageView, uri: Uri) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).centerCrop()
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL)
         //thumbnail缩略图
         Glide.with(img).asBitmap().thumbnail(0.5f).apply(options).load(uri).into(img)
     }
 
     override fun displayImgUri(img: ImageView, uri: Uri) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL)
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL).diskCacheStrategy(DiskCacheStrategy.ALL)
         Glide.with(img).asBitmap().apply(options).load(uri).into(img)
     }
 
     override fun displayImgString(img: ImageView, str: String) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL)
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL).diskCacheStrategy(DiskCacheStrategy.ALL)
         Glide.with(img).asBitmap().apply(options).load(str).into(img)
     }
 }

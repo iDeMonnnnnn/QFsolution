@@ -11,6 +11,7 @@ import android.os.Environment
 import android.os.FileUtils
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
@@ -21,6 +22,7 @@ import com.demon.qfsolution.fragment.GhostFragment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.*
 import java.net.URLConnection
+import androidx.documentfile.provider.DocumentFile
 
 
 /**
@@ -45,7 +47,7 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.jpg"
             val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                File(getExternalFilesDir(Environment.DIRECTORY_DCIM), name)
+                File(getExternalOrFilesDir(Environment.DIRECTORY_DCIM), name)
             } else {
                 File("${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_DCIM}", name)
             }
@@ -164,7 +166,7 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.png"
             val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), name)
+                File(getExternalOrFilesDir(Environment.DIRECTORY_PICTURES), name)
             } else {
                 File("${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}", name)
             }
@@ -287,7 +289,11 @@ fun File.getFileUri(context: Context): Uri {
 fun Uri.saveFileByUri(context: Context): File? {
     try {
         val inputStream = context.contentResolver.openInputStream(this)
-        val file = File(context.getExternalFilesDir("Temp"), "${this.authority}_${this.lastPathSegment}.${this.getExtensionByUri(context)}")
+        val fileName = this.getFileName(context) ?: "${System.currentTimeMillis()}.${getExtensionByUri(context)}"
+        val file = File(context.getCacheChildDir(null), fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
         val fos = FileOutputStream(file)
         val bis = BufferedInputStream(inputStream)
         val bos = BufferedOutputStream(fos)
@@ -451,6 +457,14 @@ fun Uri?.getDataColumn(context: Context): String? {
 }
 
 /**
+ * 根据Uri获取文件名
+ */
+fun Uri.getFileName(context: Context): String? {
+    val documentFile = DocumentFile.fromSingleUri(context, this)
+    return documentFile?.name
+}
+
+/**
  * 根据Uri获取MimeType
  */
 fun Uri.getMimeTypeByUri(context: Context) =
@@ -534,23 +548,74 @@ fun Uri?.isFileExists(context: Context): Boolean {
     }
 }
 
-fun Uri?.grantPermissions(context: Context, intent: Intent, writeAble: Boolean = false) {
-    this ?: return
-    var flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
-    if (writeAble) {
-        flag = flag or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    }
-    intent.addFlags(flag)
-    val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-    for (resolveInfo in resInfoList) {
-        val packageName = resolveInfo.activityInfo.packageName
-        context.grantUriPermission(packageName, this, flag)
-    }
-}
-
-
 /**
  * 文件是否存在作用域内
  */
 fun String.isExistScope(context: Context): Boolean =
     this.contains("/Android/data/${context.packageName}") && File(this).exists()
+
+
+/**
+ * getFilesDir和getCacheDir是在手机自带的一块存储区域(internal storage)，通常比较小，SD卡取出也不会影响到，App的sqlite数据库和SharedPreferences都存储在这里。所以这里应该存放特别私密重要的东西。
+ *
+ * getExternalFilesDir和getExternalCacheDir是在SD卡下(external storage)，在sdcard/Android/data/包名/files和sdcard/Android/data/包名/cache下，会跟随App卸载被删除。
+ *
+ * @param type The type of files directory to return. May be {@code null}
+ *            for the root of the files directory or one of the following
+ *            constants for a subdirectory
+ * @see android.os.Environment.DIRECTORY_MUSIC,
+ * @see android.os.Environment.DIRECTORY_PODCASTS,
+ * @see android.os.Environment.DIRECTORY_RINGTONES,
+ * @see android.os.Environment.DIRECTORY_ALARMS,
+ * @see android.os.Environment.DIRECTORY_NOTIFICATIONS,
+ * @see android.os.Environment.DIRECTORY_PICTURES,
+ * @see android.os.Environment.DIRECTORY_MOVIES
+ */
+fun Context.getExternalOrFilesDir(type: String?): File {
+    // 如果获取为空则改为getFilesDir
+    val dir = getExternalFilesDir(type) ?: filesDir
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+    return dir
+}
+
+/**
+ * getExternalOrFilesDir().getAbsolutePath()
+ * @see getExternalOrFilesDir
+ */
+fun Context.getExternalOrFilesDirPath(type: String?): String {
+    return getExternalOrFilesDir(type).absolutePath
+}
+
+/**
+ * getFilesDir和getCacheDir是在手机自带的一块存储区域(internal storage)，通常比较小，SD卡取出也不会影响到，App的sqlite数据库和SharedPreferences都存储在这里。所以这里应该存放特别私密重要的东西。
+ *
+ * getExternalFilesDir和getExternalCacheDir是在SD卡下(external storage)，在sdcard/Android/data/包名/files和sdcard/Android/data/包名/cache下，会跟随App卸载被删除。
+ */
+fun Context.getExternalOrCacheDir(): File {
+    // 如果获取为空则改为getCacheDir
+    val dir = externalCacheDir ?: cacheDir
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+    return dir
+}
+
+fun Context.getExternalOrCacheDirPath(): String {
+    return getExternalOrCacheDir().absolutePath
+}
+
+/**
+ * 在缓存目录下新键子目录
+ */
+fun Context.getCacheChildDir(child: String?): File {
+    val name = if (TextUtils.isEmpty(child)) {
+        "app"
+    } else {
+        child
+    }
+    val file = File(getExternalOrCacheDir(), name)
+    file.mkdirs()
+    return file
+}

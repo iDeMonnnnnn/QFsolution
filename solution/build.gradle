@@ -32,4 +32,5 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     implementation "com.google.android.material:material:$materialVersion"
+    implementation 'androidx.documentfile:documentfile:1.0.1'
 }

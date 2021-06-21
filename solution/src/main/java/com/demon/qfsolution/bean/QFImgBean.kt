@@ -10,11 +10,13 @@ import android.net.Uri
  */
 class QFImgBean {
     lateinit var uri: Uri
+    var path: String = ""
     var type = 0  //0正常图片，1拍照选项
     var isSelected = false
 
-    constructor(uri: Uri) {
+    constructor(uri: Uri, path: String) {
         this.uri = uri
+        this.path = path;
     }
 
     constructor(type: Int) {
