@@ -84,16 +84,17 @@ QFHelper.getInstance()
 
 3.获取选取图片后的结果
 
-```
- override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+```js
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getInstance().getResult(data) //获取选择结果，ArrayList<Uri>
+                    val uris = QFHelper.getInstance().getResult(data)
                     uris?.run {
                         uri = this[0]
-                        img.setImageURI(uri)
+                        Log.i(TAG, "onActivityResult: $uri")
+                        binding.img.setImageURI(uri)
                     }
                 }
             }
