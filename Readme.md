@@ -34,7 +34,7 @@ dependencies {
 ```
 
 ### 效果动图
-[下载Demo.apk体验](https://github.com/iDeMonnnnnn/QFsolution/raw/master/QFDemo.apk)
+[下载demo.apk体验](https://github.com/iDeMonnnnnn/QFsolution/raw/master/demo.apk)
 
 ![xxx](https://github.com/iDeMonnnnnn/QFsolution/blob/master/ezgif.gif?raw=true)
 ### 使用方法
@@ -84,7 +84,7 @@ QFHelper.getInstance()
 
 3.获取选取图片后的结果
 
-```js
+```
  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
@@ -100,6 +100,7 @@ QFHelper.getInstance()
         }
     }
 ```
+
 
 #### 文件操作
 本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。

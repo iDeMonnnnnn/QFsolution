@@ -99,7 +99,7 @@ class QFHelper {
      */
     fun start(activity: FragmentActivity, requestCode: Int) {
         if (maxNum < 1) {
-            Toast.makeText(activity, activity.getString(R.string.less_one), Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, activity.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -120,7 +120,7 @@ class QFHelper {
     fun start(fragment: Fragment, requestCode: Int) {
         val context = fragment.requireContext()
         if (maxNum < 1) {
-            Toast.makeText(context, context.getString(R.string.less_one), Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -8,5 +8,5 @@
     <string name="qf_last_one">请选择至少一张图片！</string>
     <string name="qf_no_more">无法选择更多图片！</string>
     <string name="qf_storage_permission">请先申请存储权限！</string>
-    <string name="less_one">maxNum不能小于1！</string>
+    <string name="qf_less_one">maxNum不能小于1！</string>
 </resources>

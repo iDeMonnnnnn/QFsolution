@@ -81,7 +81,7 @@ class QFImgsActivity : AppCompatActivity() {
                             }
                         }
                         imgList.add(1, QFImgBean(this, !isPickedOver()))
-                        adapter.notifyDataSetChanged()
+                        adapter.notifyItemInserted(1)
                     }
                 }
             }
