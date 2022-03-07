@@ -55,7 +55,7 @@ class QFImgAdapter constructor(private var imgList: MutableList<QFImgBean>, priv
                     }
                 )
                 qf_pick.setOnClickListener {
-                    if (!bean.isSelected && resultList.size >= QFHelper.getInstance().maxNum) {
+                    if (!bean.isSelected && resultList.size >= QFHelper.maxNum) {
                         Toast.makeText(mContext, mContext.getString(R.string.qf_no_more), Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }

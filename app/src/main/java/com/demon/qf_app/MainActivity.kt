@@ -25,14 +25,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        /**
-         *考虑到不同项目中FileProvider的authorities可能不一样
-         *因此这里改成可以根据自己项目FileProvider的authorities自由设置
-         *如:android:authorities="${applicationId}.file.provider",你只需要传入“file.provider”即可
-         */
-        QFHelper.getInstance().setFileProvider("file.provider")
-
-        QFImgLoader.getInstance().init(GlideLoader())
 
         PermissionX.init(this)
             .permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
@@ -61,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.btn3.setOnClickListener {
-            QFHelper.getInstance()
+            QFHelper
                 .isNeedGif(false)
                 .isNeedCamera(true)
                 .setSpanCount(3)
@@ -104,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getInstance().getResult(data)
+                    val uris = QFHelper.getResult(data)
                     uris?.run {
                         uri = this[0]
                         Log.i(TAG, "onActivityResult: $uri")

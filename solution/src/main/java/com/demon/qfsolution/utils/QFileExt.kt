@@ -51,14 +51,14 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean
             } else {
                 File("${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_DCIM}", name)
             }
-            val uri = file.getFileUri(this)
+            val uri = file.getFileUri()
             val intentCamera = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, uri)
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             val fm = supportFragmentManager
             val fragment = GhostFragment()
             fragment.init(intentCamera) {
-                if (isSave) file.saveToAlbum(this)
+                if (isSave) file.saveToAlbum()
                 when (T::class.java) {
                     File::class.java -> {
                         continuation.resumeWith(Result.success(file as T))
@@ -102,7 +102,7 @@ suspend inline fun <reified T : Any> Fragment.gotoCamera(isSave: Boolean = true,
  * String：文件的绝对路径
  * @param mimeTypes 文件[MimeType]，默认全部MimeType.all。也可多种类型如图片&文本：arrayListOf(MimeType.img, MimeType.text)
  */
-suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<MimeType> = arrayListOf(MimeType.all)): T? {
+suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<String> = arrayListOf(MimeType.all)): T? {
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -110,7 +110,7 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<M
             intent.type = "*/*"
             val arrays = arrayOfNulls<String>(mimeTypes.size)
             for (i in mimeTypes.indices) {
-                arrays[i] = mimeTypes[i].value
+                arrays[i] = mimeTypes[i]
             }
             if (arrays.isNotEmpty()) intent.putExtra(Intent.EXTRA_MIME_TYPES, arrays)
             val fm = supportFragmentManager
@@ -119,14 +119,14 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<M
                 val uri = it?.data
                 when (T::class.java) {
                     File::class.java -> {
-                        val file = uri?.uriToFile(this)
+                        val file = uri?.uriToFile()
                         continuation.resumeWith(Result.success(file as T))
                     }
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
                     String::class.java -> {
-                        val file = uri?.uriToFile(this)
+                        val file = uri?.uriToFile()
                         continuation.resumeWith(Result.success(file?.absolutePath as T))
                     }
                     else -> {
@@ -148,7 +148,7 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<M
  * Fragment中使用打开文件选择
  * @param mimeTypes 文件[MimeType]，默认全部MimeType.all。也可多种类型如图片&文本：arrayListOf(MimeType.img, MimeType.text)
  */
-suspend inline fun <reified T : Any> Fragment.openFile(mimeTypes: List<MimeType> = arrayListOf(MimeType.all)): T? {
+suspend inline fun <reified T : Any> Fragment.openFile(mimeTypes: List<String> = arrayListOf(MimeType.all)): T? {
     val activity = requireActivity()
     return activity.openFile<T>(mimeTypes)
 }
@@ -196,14 +196,13 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
             val fm = supportFragmentManager
             val fragment = GhostFragment()
             fragment.init(intentCrop) {
-                if (isSave) file.saveToAlbum(this)
+                if (isSave) file.saveToAlbum()
                 when (T::class.java) {
                     File::class.java -> {
                         continuation.resumeWith(Result.success(file as T))
                     }
                     Uri::class.java -> {
-                        val result_uri = file.getFileUri(this)
-                        continuation.resumeWith(Result.success(result_uri as T))
+                        continuation.resumeWith(Result.success(file.getFileUri() as T))
                     }
                     String::class.java -> {
                         continuation.resumeWith(Result.success(file.absolutePath as T))
@@ -250,7 +249,7 @@ suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, isSave: Boolea
 /**
  * 将Uri转为File
  */
-fun Uri?.uriToFile(context: Context): File? {
+fun Uri?.uriToFile(): File? {
     this ?: return null
     Log.i("FileExt", "uriToFile: $this")
     return when (scheme) {
@@ -259,9 +258,9 @@ fun Uri?.uriToFile(context: Context): File? {
         }
         ContentResolver.SCHEME_CONTENT -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                getFileFromUriQ(context)
+                getFileFromUriQ()
             } else {
-                getFileFromUriN(context)
+                getFileFromUriN()
             }
         }
         else -> {
@@ -273,9 +272,9 @@ fun Uri?.uriToFile(context: Context): File? {
 /**
  * fileProvider
  */
-fun File.getFileUri(context: Context): Uri {
+fun File.getFileUri(): Uri {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        FileProvider.getUriForFile(context, "${context.packageName}.${QFHelper.getInstance().authorities}", this)
+        FileProvider.getUriForFile(QFHelper.context, "${QFHelper.context.packageName}.${QFHelper.authorities}", this)
     } else {
         Uri.fromFile(this)
     }
@@ -286,11 +285,11 @@ fun File.getFileUri(context: Context): Uri {
  * 此方法能解决部分Uri无法获取到File的问题
  * 但是会造成文件冗余，可以根据实际情况，决定是否需要删除
  */
-fun Uri.saveFileByUri(context: Context): File? {
+fun Uri.saveFileByUri(): File? {
     try {
-        val inputStream = context.contentResolver.openInputStream(this)
-        val fileName = this.getFileName(context) ?: "${System.currentTimeMillis()}.${getExtensionByUri(context)}"
-        val file = File(context.getCacheChildDir(null), fileName)
+        val inputStream = QFHelper.context.contentResolver.openInputStream(this)
+        val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
+        val file = File(QFHelper.context.getCacheChildDir(null), fileName)
         if (!file.exists()) {
             file.createNewFile()
         }
@@ -318,22 +317,22 @@ fun Uri.saveFileByUri(context: Context): File? {
  * AndroidQ中只有沙盒中的文件可以直接根据绝对路径获取File，非沙盒环境是无法根据绝对路径访问的
  * 因此先判断Uri是否是沙盒中的文件，如果是直接拼接绝对路径访问，否则使用[saveFileByUri]复制到沙盒中生成File
  */
-fun Uri.getFileFromUriQ(context: Context): File? {
+fun Uri.getFileFromUriQ(): File? {
     var file: File? = null
-    if (DocumentsContract.isDocumentUri(context, this)) {
+    if (DocumentsContract.isDocumentUri(QFHelper.context, this)) {
         val uriId = DocumentsContract.getDocumentId(this)
         Log.i("FileExt", "getFileFromUriQ: ${DocumentsContract.getDocumentId(this)}")
         val split: List<String> = uriId.split(":")
         //文件存在沙盒中，可直接拼接全路径访问
         //判断依据目前是Android/data/包名，不够严谨
-        if (split.size > 1 && split[1].contains("Android/data/${context.packageName}")) {
+        if (split.size > 1 && split[1].contains("Android/data/${QFHelper.context.packageName}")) {
             //AndroidQ无法通过Environment.getExternalStorageDirectory()获取SD卡根目录，因此直接/storage/emulated/0/拼接
             file = File("/storage/emulated/0/${split[1]}")
         }
     }
     val flag = file?.exists() ?: false
     return if (!flag) {
-        this.saveFileByUri(context)
+        this.saveFileByUri()
     } else {
         file
     }
@@ -342,7 +341,7 @@ fun Uri.getFileFromUriQ(context: Context): File? {
 /**
  * 根据Uri获取File，AndroidN~AndroidQ可用
  */
-fun Uri.getFileFromUriN(context: Context): File? {
+fun Uri.getFileFromUriN(): File? {
     var file: File? = null
     var uri = this
     Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
@@ -352,14 +351,14 @@ fun Uri.getFileFromUriN(context: Context): File? {
      * media类型的Uri，形如content://media/external/images/media/11560
      */
     if (file == null && authority != null && authority.startsWith("media")) {
-        uri.getDataColumn(context)?.run {
+        uri.getDataColumn()?.run {
             file = File(this)
         }
     }
     /**
      * fileProvider授权的Uri
      */
-    if (file == null && authority != null && authority.startsWith(context.packageName) && path != null) {
+    if (file == null && authority != null && authority.startsWith(QFHelper.context.packageName) && path != null) {
         //这里的值来自你的provider_paths.xml，如果不同需要自己进行添加修改
         val externals = mutableListOf(
             "/external",
@@ -383,7 +382,7 @@ fun Uri.getFileFromUriN(context: Context): File? {
     /**
      * Intent.ACTION_OPEN_DOCUMENT选择的文件Uri
      */
-    if (file == null && DocumentsContract.isDocumentUri(context, this)) {
+    if (file == null && DocumentsContract.isDocumentUri(QFHelper.context, this)) {
         val uriId = DocumentsContract.getDocumentId(this)
         Log.i("FileExt", "isDocumentUri: ${DocumentsContract.getDocumentId(this)}")
         val split: List<String> = uriId.split(":")
@@ -414,7 +413,7 @@ fun Uri.getFileFromUriN(context: Context): File? {
                     if (split.size > 1) {
                         uri = ContentUris.withAppendedId(this, split[1].toLong())
                         Log.i("FileExt", "isDocumentUri media: $uri")
-                        uri.getDataColumn(context)?.run {
+                        uri.getDataColumn()?.run {
                             file = File(this)
                         }
                     }
@@ -425,8 +424,8 @@ fun Uri.getFileFromUriN(context: Context): File? {
     val flag = file?.exists() ?: false
     return if (!flag) {
         //形如content://com.android.providers.downloads.documents/document/582的下载内容中的文件
-        //无法根据Uri获取到真实路径的文件，统一使用saveFileByUri(context)方法获取File
-        uri.saveFileByUri(context)
+        //无法根据Uri获取到真实路径的文件，统一使用saveFileByUri()方法获取File
+        uri.saveFileByUri()
     } else {
         file
     }
@@ -436,12 +435,12 @@ fun Uri.getFileFromUriN(context: Context): File? {
  * 根据Uri查询文件路径
  * Android4.4之前都可用，Android4.4之后只有从多媒体中选择的文件可用
  */
-fun Uri?.getDataColumn(context: Context): String? {
+fun Uri?.getDataColumn(): String? {
     if (this == null) return null
     var str: String? = null
     var cursor: Cursor? = null
     try {
-        cursor = context.contentResolver.query(this, arrayOf(MediaStore.MediaColumns.DATA), null, null, null)
+        cursor = QFHelper.context.contentResolver.query(this, arrayOf(MediaStore.MediaColumns.DATA), null, null, null)
         cursor?.run {
             if (this.moveToFirst()) {
                 val index = this.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
@@ -459,22 +458,22 @@ fun Uri?.getDataColumn(context: Context): String? {
 /**
  * 根据Uri获取文件名
  */
-fun Uri.getFileName(context: Context): String? {
-    val documentFile = DocumentFile.fromSingleUri(context, this)
+fun Uri.getFileName(): String? {
+    val documentFile = DocumentFile.fromSingleUri(QFHelper.context, this)
     return documentFile?.name
 }
 
 /**
  * 根据Uri获取MimeType
  */
-fun Uri.getMimeTypeByUri(context: Context) =
-    context.contentResolver.getType(this)
+fun Uri.getMimeTypeByUri() =
+    QFHelper.context.contentResolver.getType(this)
 
 /**
  * 根据Uri获取扩展名
  */
-fun Uri.getExtensionByUri(context: Context) =
-    this.getMimeTypeByUri(context)?.getExtensionByMimeType()
+fun Uri.getExtensionByUri() =
+    this.getMimeTypeByUri()?.getExtensionByMimeType()
 
 /**
  * 根据文件名获取扩展名
@@ -497,12 +496,12 @@ fun String.getExtensionByMimeType() =
 /**
  * 将图片保存至相册，兼容AndroidQ
  */
-fun File?.saveToAlbum(context: Context): Boolean {
+fun File?.saveToAlbum(): Boolean {
     if (this == null) return false
     Log.i("FileExt", "saveToAlbum: ${this.absolutePath}")
     runCatching {
         val values = ContentValues()
-        val resolver = context.contentResolver;
+        val resolver = QFHelper.context.contentResolver
         val fileName = this.name
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
         values.put(MediaStore.MediaColumns.MIME_TYPE, fileName.getMimeTypeByFileName())
@@ -534,12 +533,12 @@ fun File?.saveToAlbum(context: Context): Boolean {
 /**
  * 判断公有目录文件否存在，自Android Q开始，公有目录File API都失效，不能直接通过new File(path).exists();判断公有目录文件是否存在
  */
-fun Uri?.isFileExists(context: Context): Boolean {
+fun Uri?.isFileExists(): Boolean {
     if (this == null) return false
     Log.i("FileExt", "isFileExists: $this")
     var afd: AssetFileDescriptor? = null
     return try {
-        afd = context.contentResolver.openAssetFileDescriptor(this, "r")
+        afd = QFHelper.context.contentResolver.openAssetFileDescriptor(this, "r")
         afd != null
     } catch (e: FileNotFoundException) {
         false
@@ -551,8 +550,8 @@ fun Uri?.isFileExists(context: Context): Boolean {
 /**
  * 文件是否存在作用域内
  */
-fun String.isExistScope(context: Context): Boolean =
-    this.contains("/Android/data/${context.packageName}") && File(this).exists()
+fun String.isExistScope(): Boolean =
+    this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
 
 
 /**

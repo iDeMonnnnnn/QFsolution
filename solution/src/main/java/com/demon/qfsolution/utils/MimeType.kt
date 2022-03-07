@@ -6,86 +6,88 @@ package com.demon.qfsolution.utils
  * E-mail 757454343@qq.com
  * Desc: Android常用MimeType，参考：https://www.w3school.com.cn/media/media_mimeref.asp
  */
-enum class MimeType(val value: String) {
-    all("*/*"),
-    img("image/*"),
-    video("video/*"),
-    audio("audio/*"),
-    text("text/*"),
-    apk("application/vnd.android.package-archive"),
-    zip("application/x-zip-compressed"),
-    pdf("application/pdf"),
+object MimeType {
+    const val all = "*/*"
+    const val img = "image/*"
+    const val video = "video/*"
+    const val audio = "audio/*"
+    const val text = "text/*"
+    const val apk = "application/vnd.android.package-archive"
+    const val zip = "application/x-zip-compressed"
+    const val pdf = "application/pdf"
+
     /**
      * Word
      */
-    doc("application/msword"),
-    docx("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    const val doc = "application/msword"
+    const val docx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
     /**
      * PPT
      */
-    ppt("application/vnd.ms-powerpoint"),
-    pptx("application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+    const val ppt = "application/vnd.ms-powerpoint"
+    const val pptx = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
     /**
      * Excel
      */
-    xls("application/vnd.ms-excel"),
-    xlsx("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-    _png("image/png"),
-    _jpeg("image/jpeg"),
-    _jpg("image/jpeg"),
-    _webp("image/webp"),
-    _gif("image/gif"),
-    _bmp("image/bmp"),
-    _3gp("video/3gpp"),
-    _asf("video/x-ms-asf"),
-    _avi("video/x-msvideo"),
-    _bin("application/octet-stream"),
-    _c("text/plain"),
-    _class("application/octet-stream"),
-    _conf("text/plain"),
-    _cpp("text/plain"),
-    _exe("application/octet-stream"),
-    _gtar("application/x-gtar"),
-    _gz("application/x-gzip"),
-    _h("text/plain"),
-    _htm("text/html"),
-    _html("text/html"),
-    _jar("application/java-archive"),
-    _java("text/plain"),
-    _js("application/x-javascript"),
-    _log("text/plain"),
-    _m3u("audio/x-mpegurl"),
-    _m4a("audio/mp4a-latm"),
-    _m4b("audio/mp4a-latm"),
-    _m4p("audio/mp4a-latm"),
-    _m4u("video/vnd.mpegurl"),
-    _m4v("video/x-m4v"),
-    _mov("video/quicktime"),
-    _mp2("audio/x-mpeg"),
-    _mp3("audio/x-mpeg"),
-    _mp4("video/mp4"),
-    _mpc("application/vnd.mpohun.certificate"),
-    _mpe("video/mpeg"),
-    _mpeg("video/mpeg"),
-    _mpg("video/mpeg"),
-    _mpg4("video/mp4"),
-    _mpga("audio/mpeg"),
-    _msg("application/vnd.ms-outlook"),
-    _ogg("audio/ogg"),
-    _pps("application/vnd.ms-powerpoint"),
-    _prop("text/plain"),
-    _rc("text/plain"),
-    _rmvb("audio/x-pn-realaudio"),
-    _rtf("application/rtf"),
-    _sh("text/plain"),
-    _tar("application/x-tar"),
-    _tgz("application/x-compressed"),
-    _txt("text/plain"),
-    _wav("audio/x-wav"),
-    _wma("audio/x-ms-wma"),
-    _wmv("audio/x-ms-wmv"),
-    _wps("application/vnd.ms-works"),
-    _xml("text/plain"),
-    _z("application/x-compress"),
-    ;
+    const val xls = "application/vnd.ms-excel"
+    const val xlsx = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    const val _png = "image/png"
+    const val _jpeg = "image/jpeg"
+    const val _jpg = "image/jpeg"
+    const val _webp = "image/webp"
+    const val _gif = "image/gif"
+    const val _bmp = "image/bmp"
+    const val _3gp = "video/3gpp"
+    const val _asf = "video/x-ms-asf"
+    const val _avi = "video/x-msvideo"
+    const val _bin = "application/octet-stream"
+    const val _c = "text/plain"
+    const val _class = "application/octet-stream"
+    const val _conf = "text/plain"
+    const val _cpp = "text/plain"
+    const val _exe = "application/octet-stream"
+    const val _gtar = "application/x-gtar"
+    const val _gz = "application/x-gzip"
+    const val _h = "text/plain"
+    const val _htm = "text/html"
+    const val _html = "text/html"
+    const val _jar = "application/java-archive"
+    const val _java = "text/plain"
+    const val _js = "application/x-javascript"
+    const val _log = "text/plain"
+    const val _m3u = "audio/x-mpegurl"
+    const val _m4a = "audio/mp4a-latm"
+    const val _m4b = "audio/mp4a-latm"
+    const val _m4p = "audio/mp4a-latm"
+    const val _m4u = "video/vnd.mpegurl"
+    const val _m4v = "video/x-m4v"
+    const val _mov = "video/quicktime"
+    const val _mp2 = "audio/x-mpeg"
+    const val _mp3 = "audio/x-mpeg"
+    const val _mp4 = "video/mp4"
+    const val _mpc = "application/vnd.mpohun.certificate"
+    const val _mpe = "video/mpeg"
+    const val _mpeg = "video/mpeg"
+    const val _mpg = "video/mpeg"
+    const val _mpg4 = "video/mp4"
+    const val _mpga = "audio/mpeg"
+    const val _msg = "application/vnd.ms-outlook"
+    const val _ogg = "audio/ogg"
+    const val _pps = "application/vnd.ms-powerpoint"
+    const val _prop = "text/plain"
+    const val _rc = "text/plain"
+    const val _rmvb = "audio/x-pn-realaudio"
+    const val _rtf = "application/rtf"
+    const val _sh = "text/plain"
+    const val _tar = "application/x-tar"
+    const val _tgz = "application/x-compressed"
+    const val _txt = "text/plain"
+    const val _wav = "audio/x-wav"
+    const val _wma = "audio/x-ms-wma"
+    const val _wmv = "audio/x-ms-wmv"
+    const val _wps = "application/vnd.ms-works"
+    const val _xml = "text/plain"
+    const val _z = "application/x-compress"
 }

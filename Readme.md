@@ -39,15 +39,23 @@ dependencies {
 ![xxx](https://github.com/iDeMonnnnnn/QFsolution/blob/master/ezgif.gif?raw=true)
 ### 使用方法
 
+#### 初始化
+
+
+```kotlin
+//供一个全局的Context
+QFHelper.init(this)
+```
+
 #### FileProvider
-```js
+
+```kotlin
         /**
          *考虑到不同项目中FileProvider的authorities可能不一样
          *因此这里改成可以根据自己项目FileProvider的authorities自由设置
          *如:android:authorities="${applicationId}.file.provider",你只需要传入“file.provider”即可
          */
-        QFHelper.getInstance().setFileProvider("file.provider")
-
+        QFHelper.setFileProvider("file.provider")
 ```
 
 ```xml
@@ -67,30 +75,29 @@ dependencies {
 1.在启动图片选择器之前，你需要初始化图片加载器,你可以参考示例代码的[GlideLoader](https://github.com/iDeMonnnnnn/QFsolution/blob/master/app/src/main/java/com/demon/qf_app/GlideLoader.kt)
 ，实现IQFImgLoader接口，此举是为了解决不同项目的使用不同图片加载库的问题和减少库体积。
 
-```
-QFImgLoader.getInstance().init(GlideLoader()) //初始化图片加载器
+```kotlin
+QFHelper.initImgLoader(GlideLoader()) //初始化图片加载器
 ```
 
 2.配置参数，启动图片选择库。
-```js
-QFHelper.getInstance()
-                .isNeedGif(false) //是需要gif，默认false
-                .isNeedCamera(true)  //是否需要拍照选项，默认true
-                .setSpanCount(3) //每行显示多少张图片，默认&建议：3, 可根据手机分辨率实际情况大小进行调整
-                .setLoadNum(30) //设置分页加载每次加载多少张图片，默认&建议：30，可根据手机分辨率实际情况大小进行调整，注意：该值最少应该保证首次加载充满全屏，否则无法加载更多
-                .setMaxNum(9) //设置可选择最多maxNum张图片，默认&最小值：1
-                .start(this, 0x001) //第一个参数：activity或者fragment，第二个参数requestCode
+```kotlin
+QFHelper.isNeedGif(false) //是需要gif，默认false
+        .isNeedCamera(true)  //是否需要拍照选项，默认true
+        .setSpanCount(3) //每行显示多少张图片，默认&建议：3, 可根据手机分辨率实际情况大小进行调整
+        .setLoadNum(30) //设置分页加载每次加载多少张图片，默认&建议：30，可根据手机分辨率实际情况大小进行调整，注意：该值最少应该保证首次加载充满全屏，否则无法加载更多
+        .setMaxNum(9) //设置可选择最多maxNum张图片，默认&最小值：1
+        .start(this, 0x001) //第一个参数：activity或者fragment，第二个参数requestCode
 ```
 
 3.获取选取图片后的结果
 
-```js
+```kotlin
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getInstance().getResult(data)
+                    val uris = QFHelper.getResult(data)
                     uris?.run {
                         uri = this[0]
                         Log.i(TAG, "onActivityResult: $uri")
@@ -113,7 +120,7 @@ QFHelper.getInstance()
 更多使用细节，可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
 
 1.系统文件选择
-```js
+```kotlin
 GlobalScope.launchUI {
 uri = openFile<String>()?.run {  File(this).toUri() }
 img.setImageURI(uri)
@@ -121,7 +128,7 @@ img.setImageURI(uri)
 ```
 
 2.系统拍照
-```js
+```kotlin
 GlobalScope.launchUI {
      uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
      img.setImageURI(uri)
@@ -130,22 +137,22 @@ GlobalScope.launchUI {
 
 3.系统比例裁剪
 
-```
+```kotlin
 GlobalScope.launchUI {
     uri?.run {
-              uri = startCrop(this, 300, 600)
-              img.setImageURI(uri)
+       uri = startCrop(this, 300, 600)
+       img.setImageURI(uri)
   }
 }
 ```
 
 4.系统自由裁剪
 
-```
+```kotlin
 GlobalScope.launchUI {
     uri?.run {
-              uri = startCrop(this)
-              img.setImageURI(uri)
+       uri = startCrop(this)
+       img.setImageURI(uri)
   }
 }
 ```
@@ -158,8 +165,8 @@ GlobalScope.launchUI {
 AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只能通过Uri去访问文件，因此访问外部存储文件只能，按照如上方法通过将Uri写入沙盒环境成新文件，再获取File。
 
 使用本库的```uriToFile```扩展方法即可，如下：
-```
-  val file: File? = uri.uriToFile(this@MainActivity)
+```kotlin
+  val file: File? = uri.uriToFile()
 ```
 
 

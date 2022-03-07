@@ -17,7 +17,6 @@ class QFImgLoader : IQFImgLoader {
         this.loader = loader
     }
 
-
     override fun displayThumbnail(img: ImageView, uri: Uri) {
         loader?.displayThumbnail(img, uri)
     }

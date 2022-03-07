@@ -48,11 +48,11 @@ class QFImgsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_qf_imgs)
         btn_qf_ok = findViewById(R.id.btn_qf_ok)
         rv_imgs = findViewById(R.id.rv_imgs)
-        if (!QFHelper.getInstance().isSinglePick()) {
-            btn_qf_ok.text = getString(R.string.qf_ok_value, 0, QFHelper.getInstance().maxNum)
+        if (!QFHelper.isSinglePick()) {
+            btn_qf_ok.text = getString(R.string.qf_ok_value, 0, QFHelper.maxNum)
         }
 
-        if (QFHelper.getInstance().isNeedCamera) {
+        if (QFHelper.isNeedCamera) {
             imgList.add(QFImgBean(1))
         }
 
@@ -60,8 +60,8 @@ class QFImgsActivity : AppCompatActivity() {
         getImgDatas()
         adapter = QFImgAdapter(imgList, object : QFImgAdapter.ImgPickedListener {
             override fun onImgPickedChange(uris: ArrayList<Uri>, size: Int) {
-                if (!QFHelper.getInstance().isSinglePick()) {
-                    btn_qf_ok.text = getString(R.string.qf_ok_value, size, QFHelper.getInstance().maxNum)
+                if (!QFHelper.isSinglePick()) {
+                    btn_qf_ok.text = getString(R.string.qf_ok_value, size, QFHelper.maxNum)
                 }
             }
 
@@ -76,8 +76,8 @@ class QFImgsActivity : AppCompatActivity() {
                     gotoCamera<Uri>(true)?.run {
                         if (!isPickedOver()) {
                             adapter.resultList.add(this)
-                            if (!QFHelper.getInstance().isSinglePick()) {
-                                btn_qf_ok.text = getString(R.string.qf_ok_value, adapter.resultList.size, QFHelper.getInstance().maxNum)
+                            if (!QFHelper.isSinglePick()) {
+                                btn_qf_ok.text = getString(R.string.qf_ok_value, adapter.resultList.size, QFHelper.maxNum)
                             }
                         }
                         imgList.add(1, QFImgBean(this, !isPickedOver()))
@@ -87,14 +87,14 @@ class QFImgsActivity : AppCompatActivity() {
             }
 
             override fun onImgClick(uri: Uri) {
-                QFHelper.getInstance().startImgBrowse(this@QFImgsActivity, uri)
+                QFHelper.startImgBrowse(this@QFImgsActivity, uri)
             }
         })
         rv_imgs.setHasFixedSize(true)
-        val gridLayoutManager = HackyGridLayoutManager(this, QFHelper.getInstance().spanCount)
+        val gridLayoutManager = HackyGridLayoutManager(this, QFHelper.spanCount)
         gridLayoutManager.isSmoothScrollbarEnabled = true
         rv_imgs.layoutManager = gridLayoutManager
-        rv_imgs.addItemDecoration(SpacesItemDecoration(resources.getDimensionPixelOffset(R.dimen.qf_grid_margin), QFHelper.getInstance().spanCount))
+        rv_imgs.addItemDecoration(SpacesItemDecoration(resources.getDimensionPixelOffset(R.dimen.qf_grid_margin), QFHelper.spanCount))
         rv_imgs.addOnScrollListener(ScrollListener())
         rv_imgs.adapter = adapter
 
@@ -114,14 +114,14 @@ class QFImgsActivity : AppCompatActivity() {
     private fun getImgDatas() {
         index = 0
         cursor?.run {
-            while (moveToNext() && index <= QFHelper.getInstance().loadNum) {
+            while (moveToNext() && index <= QFHelper.loadNum) {
                 val picPath = getString(getColumnIndex(MediaStore.Images.Media.DATA)) ?: ""
                 if (TextUtils.isEmpty(picPath) || !File(picPath).exists()) {
                     Log.i(TAG, "getImgDatas: $picPath no exists")
                 } else {
                     val id = getLong(getColumnIndexOrThrow(MediaStore.Images.Media._ID))
                     val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                    if (!QFHelper.getInstance().isNeedGif && uri.getExtensionByUri(this@QFImgsActivity) == "gif") {
+                    if (!QFHelper.isNeedGif && uri.getExtensionByUri() == "gif") {
                         continue
                     }
                     imgList.add(QFImgBean(uri, picPath))
@@ -129,7 +129,7 @@ class QFImgsActivity : AppCompatActivity() {
                 }
             }
         }
-        if (index < QFHelper.getInstance().loadNum) {
+        if (index < QFHelper.loadNum) {
             hasImgs = false
             cursor?.close()
         } else {
@@ -138,7 +138,7 @@ class QFImgsActivity : AppCompatActivity() {
 
     }
 
-    fun isPickedOver() = adapter.resultList.size == QFHelper.getInstance().maxNum
+    fun isPickedOver() = adapter.resultList.size == QFHelper.maxNum
 
     /**
      * 加载更多

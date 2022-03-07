@@ -58,7 +58,7 @@ class MainFragment : DialogFragment() {
             }
         }
         binding.btn3.setOnClickListener {
-            QFHelper.getInstance()
+            QFHelper
                 .isNeedGif(false)
                 .isNeedCamera(true)
                 .setSpanCount(3)
@@ -93,7 +93,7 @@ class MainFragment : DialogFragment() {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getInstance().getResult(data)
+                    val uris = QFHelper.getResult(data)
                     uris?.run {
                         uri = this[0]
                         binding.img.setImageURI(uri)
