@@ -273,6 +273,7 @@ fun Uri?.uriToFile(): File? {
  * fileProvider
  */
 fun File.getFileUri(): Uri {
+    QFHelper.assertNotInit()
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         FileProvider.getUriForFile(QFHelper.context, "${QFHelper.context.packageName}.${QFHelper.authorities}", this)
     } else {
@@ -286,6 +287,7 @@ fun File.getFileUri(): Uri {
  * 但是会造成文件冗余，可以根据实际情况，决定是否需要删除
  */
 fun Uri.saveFileByUri(): File? {
+    QFHelper.assertNotInit()
     try {
         val inputStream = QFHelper.context.contentResolver.openInputStream(this)
         val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
@@ -307,7 +309,7 @@ fun Uri.saveFileByUri(): File? {
         fos.close()
         return file
     } catch (e: Exception) {
-
+        e.printStackTrace()
     }
     return null
 }
@@ -318,6 +320,7 @@ fun Uri.saveFileByUri(): File? {
  * 因此先判断Uri是否是沙盒中的文件，如果是直接拼接绝对路径访问，否则使用[saveFileByUri]复制到沙盒中生成File
  */
 fun Uri.getFileFromUriQ(): File? {
+    QFHelper.assertNotInit()
     var file: File? = null
     if (DocumentsContract.isDocumentUri(QFHelper.context, this)) {
         val uriId = DocumentsContract.getDocumentId(this)
@@ -342,6 +345,7 @@ fun Uri.getFileFromUriQ(): File? {
  * 根据Uri获取File，AndroidN~AndroidQ可用
  */
 fun Uri.getFileFromUriN(): File? {
+    QFHelper.assertNotInit()
     var file: File? = null
     var uri = this
     Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
@@ -436,6 +440,7 @@ fun Uri.getFileFromUriN(): File? {
  * Android4.4之前都可用，Android4.4之后只有从多媒体中选择的文件可用
  */
 fun Uri?.getDataColumn(): String? {
+    QFHelper.assertNotInit()
     if (this == null) return null
     var str: String? = null
     var cursor: Cursor? = null
@@ -459,6 +464,7 @@ fun Uri?.getDataColumn(): String? {
  * 根据Uri获取文件名
  */
 fun Uri.getFileName(): String? {
+    QFHelper.assertNotInit()
     val documentFile = DocumentFile.fromSingleUri(QFHelper.context, this)
     return documentFile?.name
 }
@@ -466,8 +472,10 @@ fun Uri.getFileName(): String? {
 /**
  * 根据Uri获取MimeType
  */
-fun Uri.getMimeTypeByUri() =
-    QFHelper.context.contentResolver.getType(this)
+fun Uri.getMimeTypeByUri(): String? {
+    QFHelper.assertNotInit()
+    return QFHelper.context.contentResolver.getType(this)
+}
 
 /**
  * 根据Uri获取扩展名
@@ -497,6 +505,7 @@ fun String.getExtensionByMimeType() =
  * 将图片保存至相册，兼容AndroidQ
  */
 fun File?.saveToAlbum(): Boolean {
+    QFHelper.assertNotInit()
     if (this == null) return false
     Log.i("FileExt", "saveToAlbum: ${this.absolutePath}")
     runCatching {
@@ -534,6 +543,7 @@ fun File?.saveToAlbum(): Boolean {
  * 判断公有目录文件否存在，自Android Q开始，公有目录File API都失效，不能直接通过new File(path).exists();判断公有目录文件是否存在
  */
 fun Uri?.isFileExists(): Boolean {
+    QFHelper.assertNotInit()
     if (this == null) return false
     Log.i("FileExt", "isFileExists: $this")
     var afd: AssetFileDescriptor? = null
@@ -550,8 +560,10 @@ fun Uri?.isFileExists(): Boolean {
 /**
  * 文件是否存在作用域内
  */
-fun String.isExistScope(): Boolean =
-    this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
+fun String.isExistScope(): Boolean {
+    QFHelper.assertNotInit()
+    return this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
+}
 
 
 /**

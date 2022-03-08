@@ -211,4 +211,12 @@ object QFHelper {
         return data?.getParcelableArrayListExtra(EXTRA_RESULT)
     }
 
+    fun assertNotInit() {
+        if (!::context.isInitialized) {
+            throw IllegalArgumentException(
+                "You should init context first!"
+            )
+        }
+    }
+
 }
