@@ -4,8 +4,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion androidTargetVersion
-    buildToolsVersion "30.0.0"
+    compileSdkVersion androidCompileVersion
 
     defaultConfig {
         applicationId "com.demon.qf_app"
@@ -22,11 +21,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_11
     }
     buildFeatures {
         viewBinding = true
@@ -39,8 +38,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$ktxVersion"
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation 'com.guolindev.permissionx:permissionx:1.6.1'
     implementation project(path: ':solution')
     //implementation 'com.github.iDeMonnnnnn:QFsolution:1.1.0'

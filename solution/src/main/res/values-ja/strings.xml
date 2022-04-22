@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QFsolution</string>
+    <string name="qf_pick_photo">画像を選択</string>
+    <string name="qf_ok">決定</string>
+    <string name="qf_ok_value">(%1d%2d)</string>
+    <string name="qf_camera_permission">を確定してカメラ権限を先に申請してください!</string>
+    <string name="qf_last_one">少なくとも1枚の画像を選んでください!</string>
+    <string name="qf_no_more">画像をもっと選べない!</string>
+    <string name="qf_storage_permission">先にストレージ権限を申請してください!</string>
+    <string name="qf_less_one">maxNumは1より小さくてはならない!</string>
+</resources>

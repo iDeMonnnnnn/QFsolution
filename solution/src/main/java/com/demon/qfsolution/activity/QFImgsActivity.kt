@@ -1,6 +1,7 @@
 package com.demon.qfsolution.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,6 +15,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.demon.qfsolution.*
 import com.demon.qfsolution.list.QFImgAdapter
@@ -22,9 +24,8 @@ import com.demon.qfsolution.list.HackyGridLayoutManager
 import com.demon.qfsolution.list.SpacesItemDecoration
 import com.demon.qfsolution.utils.getExtensionByUri
 import com.demon.qfsolution.utils.gotoCamera
-import com.demon.qfsolution.utils.isFileExists
-import com.demon.qfsolution.utils.launchUI
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -72,7 +73,7 @@ class QFImgsActivity : AppCompatActivity() {
                         return
                     }
                 }
-                GlobalScope.launchUI {
+                lifecycleScope.launch(Dispatchers.Main) {
                     gotoCamera<Uri>(true)?.run {
                         if (!isPickedOver()) {
                             adapter.resultList.add(this)
@@ -111,6 +112,7 @@ class QFImgsActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("Range")
     private fun getImgDatas() {
         index = 0
         cursor?.run {

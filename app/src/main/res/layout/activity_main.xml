@@ -29,6 +29,13 @@
         android:text="QF简易图片选择器" />
 
     <Button
+        android:id="@+id/btn31"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="QF简易图片选择器（携程）" />
+
+    <Button
         android:id="@+id/btn4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -41,6 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:text="原生自由裁剪" />
+
 
     <Button
         android:id="@+id/btn6"

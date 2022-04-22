@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">qfsolution</string>
+    <string name="qf_pick_photo">그림</string>
+    <string name="qf_ok">확인</string>
+    <string name="qf_ok_value">(%1d%2d)확인</string>
+    <string name="qf_camera_permission">먼저 카메라 권한을 신청하세요!</string>
+    <string name="qf_last_one">적어도 하나의 그림을 선택하십시오!</string>
+    <string name="qf_no_more">더 많은 그림을 선택할 수 없습니다!</string>
+    <string name="qf_storage_permission">먼저 저장 권한을 신청하세요!</string>
+    <string name="qf_less_one">maxnum은 1보다 작으면 안 된다!</string>
+</resources>

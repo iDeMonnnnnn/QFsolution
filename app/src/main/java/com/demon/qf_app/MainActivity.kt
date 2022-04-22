@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         binding.btn1.setOnClickListener {
-            GlobalScope.launchUI {
+            launchUI {
                 uri = openFile<String>(arrayListOf(MimeType.img))?.run {
                     File(this).toUri()
                 }
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.btn2.setOnClickListener {
-            GlobalScope.launchUI {
+            launchUI {
                 uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
                 binding.img.setImageURI(uri)
@@ -62,8 +62,22 @@ class MainActivity : AppCompatActivity() {
                 .start(this, 0x001)
         }
 
+        binding.btn31.setOnClickListener {
+            launchUI {
+                val uris = QFHelper
+                    .isNeedGif(false)
+                    .isNeedCamera(true)
+                    .setSpanCount(3)
+                    .setLoadNum(30)
+                    .setMaxNum(9)
+                    .startScopeUri(this)
+
+                Log.i(TAG, "onCreate: startScopeUri=$uris")
+            }
+        }
+
         binding.btn4.setOnClickListener {
-            GlobalScope.launchUI {
+            launchUI {
                 uri?.run {
                     uri = startCrop(this, 300, 300)
                     Log.i(TAG, "startCrop: $uri")
@@ -72,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.btn5.setOnClickListener {
-            GlobalScope.launchUI {
+            launchUI {
                 uri?.run {
                     uri = startCrop(this)
                     Log.i(TAG, "startCrop: $uri")

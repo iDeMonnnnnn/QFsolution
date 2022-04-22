@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QFsolution</string>
+    <string name="qf_pick_photo">選擇圖片</string>
+    <string name="qf_ok">確定</string>
+    <string name="qf_ok_value">(%1$d/%2$d)確定</string>
+    <string name="qf_camera_permission">請先申請相機權限！</string>
+    <string name="qf_last_one">請選擇至少一張圖片！</string>
+    <string name="qf_no_more">無法選擇更多圖片！</string>
+    <string name="qf_storage_permission">請先申請存儲權限！</string>
+    <string name="qf_less_one">maxNum不能小于1！</string>
+</resources>

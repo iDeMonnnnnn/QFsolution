@@ -18,7 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.demon.qfsolution.QFHelper
-import com.demon.qfsolution.fragment.GhostFragment
+import com.demon.qfsolution.fragment.QFGhostFragment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.*
 import java.net.URLConnection
@@ -56,7 +56,7 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean
             intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, uri)
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             val fm = supportFragmentManager
-            val fragment = GhostFragment()
+            val fragment = QFGhostFragment()
             fragment.init(intentCamera) {
                 if (isSave) file.saveToAlbum()
                 when (T::class.java) {
@@ -76,7 +76,7 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean
                 }
                 fm.beginTransaction().remove(fragment).commitAllowingStateLoss()
             }
-            fm.beginTransaction().add(fragment, GhostFragment::class.java.simpleName).commitAllowingStateLoss()
+            fm.beginTransaction().add(fragment, QFGhostFragment::class.java.simpleName).commitAllowingStateLoss()
         }.onFailure {
             it.printStackTrace()
             continuation.resumeWith(Result.success(null))
@@ -114,7 +114,7 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<S
             }
             if (arrays.isNotEmpty()) intent.putExtra(Intent.EXTRA_MIME_TYPES, arrays)
             val fm = supportFragmentManager
-            val fragment = GhostFragment()
+            val fragment = QFGhostFragment()
             fragment.init(intent) {
                 val uri = it?.data
                 when (T::class.java) {
@@ -136,7 +136,7 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<S
                 }
                 fm.beginTransaction().remove(fragment).commitAllowingStateLoss()
             }
-            fm.beginTransaction().add(fragment, GhostFragment::class.java.simpleName).commitAllowingStateLoss()
+            fm.beginTransaction().add(fragment, QFGhostFragment::class.java.simpleName).commitAllowingStateLoss()
         }.onFailure {
             it.printStackTrace()
             continuation.resumeWith(Result.success(null))
@@ -194,7 +194,7 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
             intentCrop.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString())
             intentCrop.putExtra(MediaStore.EXTRA_OUTPUT, crop_uri)
             val fm = supportFragmentManager
-            val fragment = GhostFragment()
+            val fragment = QFGhostFragment()
             fragment.init(intentCrop) {
                 if (isSave) file.saveToAlbum()
                 when (T::class.java) {
@@ -214,7 +214,7 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
                 }
                 fm.beginTransaction().remove(fragment).commitAllowingStateLoss()
             }
-            fm.beginTransaction().add(fragment, GhostFragment::class.java.simpleName).commitAllowingStateLoss()
+            fm.beginTransaction().add(fragment, QFGhostFragment::class.java.simpleName).commitAllowingStateLoss()
         }.onFailure {
             it.printStackTrace()
             continuation.resumeWith(Result.success(null))

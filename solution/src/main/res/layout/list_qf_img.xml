@@ -15,8 +15,8 @@
 
     <ImageView
         android:id="@+id/qf_pick"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_alignParentEnd="true"
         android:layout_margin="8dp"
         android:scaleType="fitXY"

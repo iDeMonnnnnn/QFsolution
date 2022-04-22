@@ -13,8 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.demon.qfsolution.activity.QFBigImgActivity
 import com.demon.qfsolution.activity.QFImgsActivity
+import com.demon.qfsolution.fragment.qfActivityForResult
 import com.demon.qfsolution.loader.IQFImgLoader
 import com.demon.qfsolution.loader.QFImgLoader
+import com.demon.qfsolution.utils.uriToFile
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * @author DeMon
@@ -125,18 +128,7 @@ object QFHelper {
      */
     @JvmStatic
     fun start(activity: FragmentActivity, requestCode: Int) {
-        if (maxNum < 1) {
-            Toast.makeText(activity, activity.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
-            return
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Toast.makeText(activity, activity.getString(R.string.qf_storage_permission), Toast.LENGTH_LONG).show()
-                return
-            }
-        }
+        if (assertCheck(activity)) return
         val intent = Intent(activity, QFImgsActivity::class.java)
         activity.startActivityForResult(intent, requestCode)
     }
@@ -146,22 +138,41 @@ object QFHelper {
      */
     @JvmStatic
     fun start(fragment: Fragment, requestCode: Int) {
-        val context = fragment.requireContext()
-        if (maxNum < 1) {
-            Toast.makeText(context, context.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
-            return
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Toast.makeText(context, context.getString(R.string.qf_storage_permission), Toast.LENGTH_LONG).show()
-                return
-            }
-        }
+        if (assertCheck(fragment.requireContext())) return
         val intent = Intent(context, QFImgsActivity::class.java)
         fragment.startActivityForResult(intent, requestCode)
     }
+
+    /**
+     * 携程打开简易图片库
+     */
+    suspend fun startScopeUri(activity: FragmentActivity): ArrayList<Uri>? {
+        if (assertCheck(activity)) return null
+        return suspendCancellableCoroutine { continuation ->
+            activity.qfActivityForResult(Intent(context, QFImgsActivity::class.java)) {
+                continuation.resumeWith(Result.success(getResult(it)))
+            }
+        }
+    }
+
+    suspend fun startScopePath(activity: FragmentActivity): ArrayList<String>? {
+        if (assertCheck(activity)) return null
+        return suspendCancellableCoroutine { continuation ->
+            activity.qfActivityForResult(Intent(context, QFImgsActivity::class.java)) { intent ->
+                val paths = arrayListOf<String>()
+                getResult(intent)?.forEach {
+                    it.uriToFile()?.run {
+                        paths.add(absolutePath)
+                    }
+                }
+                continuation.resumeWith(Result.success(paths))
+            }
+        }
+    }
+
+    suspend fun startScopeUri(fragment: Fragment): ArrayList<Uri>? = startScopeUri(fragment.requireActivity())
+
+    suspend fun startScopePath(fragment: Fragment): ArrayList<String>? = startScopePath(fragment.requireActivity())
 
 
     /**
@@ -209,6 +220,22 @@ object QFHelper {
     @JvmStatic
     fun getResult(data: Intent?): ArrayList<Uri>? {
         return data?.getParcelableArrayListExtra(EXTRA_RESULT)
+    }
+
+    fun assertCheck(context: Context): Boolean {
+        if (maxNum < 1) {
+            Toast.makeText(context, context.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
+            return true
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(context, context.getString(R.string.qf_storage_permission), Toast.LENGTH_LONG).show()
+                return true
+            }
+        }
+        return false
     }
 
     fun assertNotInit() {
