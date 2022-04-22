@@ -109,6 +109,20 @@ QFHelper.isNeedGif(false) //是需要gif，默认false
     }
 ```
 
+4.携程直接调起，并获取选中的图片
+
+```kotlin
+launchUI {
+    val uris = QFHelper
+        .isNeedGif(false)
+        .isNeedCamera(true)
+        .setSpanCount(3)
+        .setLoadNum(30)
+        .setMaxNum(9)
+        .startScopeUri(this)
+    Log.i(TAG, "onCreate: startScopeUri=$uris")
+}
+```
 
 #### 文件操作
 本库的文件操作包括系统文件选择，系统拍照，系统裁剪三种。
@@ -175,6 +189,8 @@ AndroidQ开始无法访问非作用域存储内的文件（沙盒环境），只
 ### 其他
 
 如果你有问题或者建议，请[Issues](https://github.com/iDeMonnnnnn/QFsolution/issues).
+
+更多使用详情可见示例代码[MainActivity.kt](https://github.com/iDeMonnnnnn/QFsolution/blob/master/app/src/main/java/com/demon/qf_app/MainActivity.kt)
 
 [基于boxing的AndroidQ适配](https://github.com/iDeMonnnnnn/Qboxing)
 
