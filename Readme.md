@@ -3,13 +3,13 @@
 [![](https://jitpack.io/v/iDeMonnnnnn/QFsolution.svg)](https://jitpack.io/#iDeMonnnnnn/QFsolution)
 
 1. **适用于AndroidQ的简易图片选择器。**
-2. **基于协程的系统文件选择,相册选择，系统拍照，系统裁剪。**
+2. **基于协程的系统文件选择，相册选择，系统拍照，系统裁剪。**
 3. **Uri转为File的究极解决方案。**
 4. **最新已兼容至Android12**
 
 ### 开始使用
 
-**使用想去可见[文档WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
+**使用详情可见[文档WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
 
 **更多使用示例，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)**
 
