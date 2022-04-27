@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -45,22 +46,25 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(fileName: Strin
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.jpg"
-            val uri = createUriInPublicDir(name, Environment.DIRECTORY_DCIM)
+            val file = getFileInPublicDir(name, Environment.DIRECTORY_DCIM)
+            val uri = file.getFileUri()
             val intentCamera = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, uri)
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             val fm = supportFragmentManager
             val fragment = QFGhostFragment()
             fragment.init(intentCamera) {
+                //更新图库
+                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
                 when (T::class.java) {
                     File::class.java -> {
-                        continuation.resumeWith(Result.success(uri.uriToFile() as T))
+                        continuation.resumeWith(Result.success(file as T))
                     }
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
                     String::class.java -> {
-                        continuation.resumeWith(Result.success(uri.uriToFile()?.absolutePath as T))
+                        continuation.resumeWith(Result.success(file.absolutePath as T))
                     }
                     else -> {
                         Log.e("FileExt", "gotoCamera:Result only support File,Uri,String!")
@@ -207,9 +211,10 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.png"
-            val cropUri = createUriInPublicDir(name, Environment.DIRECTORY_PICTURES)
+            val file = getFileInPublicDir(name, Environment.DIRECTORY_PICTURES)
+            val cropUri = file.getFileUri()
             val intentCrop = Intent("com.android.camera.action.CROP")
-            intentCrop.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            intentCrop.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intentCrop.setDataAndType(uri, "image/*")
             //下面这个crop=true是设置在开启的Intent中设置显示的VIEW可裁剪
             intentCrop.putExtra("crop", "true")
@@ -229,12 +234,14 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
             intentCrop.putExtra("noFaceDetection", true)
             //设置输出的格式
             intentCrop.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString())
+            //裁剪后uri无法保存的问题
+            cropUri.grantPermissions(this, intentCrop)
             intentCrop.putExtra(MediaStore.EXTRA_OUTPUT, cropUri)
-            //uri.grantPermissions(this, intentCrop)
             val fm = supportFragmentManager
             val fragment = QFGhostFragment()
             fragment.init(intentCrop) {
-                //if (isSave) file.saveToAlbum()
+                //更新图库
+                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
                 when (T::class.java) {
                     File::class.java -> {
                         continuation.resumeWith(Result.success(cropUri.uriToFile() as T))
@@ -603,7 +610,7 @@ fun String.isExistScope(): Boolean {
 }
 
 /**
- * Uri授权，感觉没啥用
+ * Uri授权，解决Android12和部分手机裁剪后无法保存的问题
  */
 fun Uri?.grantPermissions(context: Context, intent: Intent) {
     this ?: return
@@ -614,9 +621,30 @@ fun Uri?.grantPermissions(context: Context, intent: Intent) {
     }
 }
 
+/**
+ * new一个用于保存在公有目录的文件，不会创建空文件，用于拍照，裁剪路径
+ * 公有目录无需读写权限也可操作媒体文件：图片，适配，音频
+ * @param name 文件名
+ * @param dir 公有文件目录
+ *  @see android.os.Environment.DIRECTORY_DOWNLOADS
+ * @see android.os.Environment.DIRECTORY_DCIM,
+ * @see android.os.Environment.DIRECTORY_MUSIC,
+ * @see android.os.Environment.DIRECTORY_PODCASTS,
+ * @see android.os.Environment.DIRECTORY_RINGTONES,
+ * @see android.os.Environment.DIRECTORY_ALARMS,
+ * @see android.os.Environment.DIRECTORY_NOTIFICATIONS,
+ * @see android.os.Environment.DIRECTORY_PICTURES,
+ * @see android.os.Environment.DIRECTORY_MOVIES,
+ * @see android.os.Environment.DIRECTORY_DOCUMENTS
+ */
+fun getFileInPublicDir(name: String, dir: String = Environment.DIRECTORY_DOCUMENTS): File {
+    return File("${Environment.getExternalStorageDirectory().absolutePath}/${dir}", name)
+
+
+}
 
 /**
- * 创建用于保存在公有目录的文件uri
+ * 创建用于保存在公有目录的文件uri，会创建空文件
  * @param name 文件名
  * @param dir 公有文件目录
  *  @see android.os.Environment.DIRECTORY_DOWNLOADS
@@ -636,7 +664,7 @@ fun Context.createUriInPublicDir(name: String, dir: String = Environment.DIRECTO
         val contentValues = ContentValues() //内容
         val resolver = contentResolver //内容解析器
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name) //文件名
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/*") //文件类型
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "*/*") //文件类型
         //存放picture目录
         contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, dir)
         resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)

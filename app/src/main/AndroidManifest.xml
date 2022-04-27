@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QFsolution">
         <activity
+            android:name=".ImgBrowseActivity"
+            android:exported="false"
+            android:label="简易图片浏览器" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

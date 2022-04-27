@@ -8,6 +8,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+
     <Button
         android:id="@+id/btn1"
         android:layout_width="wrap_content"
@@ -19,19 +20,13 @@
         android:id="@+id/btn2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="系统拍照" />
+        android:text="系统相册选择" />
 
     <Button
         android:id="@+id/btn3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="QF库自带的简易图片选择器" />
-
-    <Button
-        android:id="@+id/btn31"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="QF库自带的简易图片选择器（携程调用）" />
+        android:text="系统拍照" />
 
     <Button
         android:id="@+id/btn4"
@@ -45,19 +40,16 @@
         android:layout_height="wrap_content"
         android:text="系统自由裁剪" />
 
-
     <Button
         android:id="@+id/btn6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fragment中使用"
-        android:textAllCaps="false" />
+        android:text="QF库简易图片选择器" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvImgs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    <ImageView
+        android:id="@+id/ivImg"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>
