@@ -41,7 +41,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation 'com.guolindev.permissionx:permissionx:1.6.1'
     implementation project(path: ':solution')
-    //implementation 'com.github.iDeMonnnnnn:QFsolution:1.1.0'
+    //implementation 'com.github.iDeMonnnnnn:QFsolution:1.1.7'
     implementation 'com.github.bumptech.glide:glide:4.13.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.1'
 

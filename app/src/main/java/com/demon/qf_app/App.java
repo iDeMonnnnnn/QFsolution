@@ -21,7 +21,6 @@ public class App extends Application {
          *如:android:authorities="${applicationId}.file.provider",你只需要传入“file.provider”即可
          */
         QFHelper.init(this, "file.provider");
-        //QFHelper.setFileProvider("file.provider");
         QFHelper.initImgLoader(new GlideLoader());
     }
 }

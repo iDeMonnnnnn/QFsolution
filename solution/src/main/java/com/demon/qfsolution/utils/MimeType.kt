@@ -3,7 +3,7 @@ package com.demon.qfsolution.utils
 /**
  * @author DeMon
  * Created on 2020/10/23.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc: Android常用MimeType，参考：https://www.w3school.com.cn/media/media_mimeref.asp
  */
 object MimeType {

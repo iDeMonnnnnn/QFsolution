@@ -6,7 +6,7 @@ import android.widget.ImageView
 /**
  * @author DeMon
  * Created on 2020/11/5.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc: 图片加载器接口，定义如何加载图片
  */
 interface IQFImgLoader {

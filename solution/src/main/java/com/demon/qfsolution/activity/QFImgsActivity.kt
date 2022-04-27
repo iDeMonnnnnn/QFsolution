@@ -31,7 +31,7 @@ import java.io.File
 /**
  * @author DeMon
  * Created on 2020/11/5.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc: 图片选择器
  */
 class QFImgsActivity : AppCompatActivity() {
@@ -74,7 +74,7 @@ class QFImgsActivity : AppCompatActivity() {
                     }
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
-                    gotoCamera<Uri>(true)?.run {
+                    gotoCamera<Uri>()?.run {
                         if (!isPickedOver()) {
                             adapter.resultList.add(this)
                             if (!QFHelper.isSinglePick()) {

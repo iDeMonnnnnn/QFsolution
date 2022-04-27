@@ -15,6 +15,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.demon.qfsolution.QFHelper
@@ -22,13 +23,12 @@ import com.demon.qfsolution.fragment.QFGhostFragment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.*
 import java.net.URLConnection
-import androidx.documentfile.provider.DocumentFile
 
 
 /**
  * @author DeMon
  * Created on 2020/10/23.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc:
  */
 
@@ -39,35 +39,28 @@ import androidx.documentfile.provider.DocumentFile
  * File：图片的文件对象
  * String：图片的绝对路径
  *
- * @param isSave 是否保存至相册，默认true
  * @param fileName 拍照后的文件名，默认为空 取时间戳.jpg
  */
-suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(fileName: String? = null): T? {
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.jpg"
-            val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                File(getExternalOrFilesDir(Environment.DIRECTORY_DCIM), name)
-            } else {
-                File("${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_DCIM}", name)
-            }
-            val uri = file.getFileUri()
+            val uri = createUriInPublicDir(name, Environment.DIRECTORY_DCIM)
             val intentCamera = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, uri)
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             val fm = supportFragmentManager
             val fragment = QFGhostFragment()
             fragment.init(intentCamera) {
-                if (isSave) file.saveToAlbum()
                 when (T::class.java) {
                     File::class.java -> {
-                        continuation.resumeWith(Result.success(file as T))
+                        continuation.resumeWith(Result.success(uri.uriToFile() as T))
                     }
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
                     String::class.java -> {
-                        continuation.resumeWith(Result.success(file.absolutePath as T))
+                        continuation.resumeWith(Result.success(uri.uriToFile()?.absolutePath as T))
                     }
                     else -> {
                         Log.e("FileExt", "gotoCamera:Result only support File,Uri,String!")
@@ -86,16 +79,66 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(isSave: Boolean
 
 /**
  * Fragment中使用相机拍照
- * @param isSave 是否保存至相册，默认true
  * @param fileName 文件名，默认为空取时间戳
  */
-suspend inline fun <reified T : Any> Fragment.gotoCamera(isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> Fragment.gotoCamera(fileName: String? = null): T? {
     val activity = requireActivity()
-    return activity.gotoCamera<T>(isSave, fileName)
+    return activity.gotoCamera<T>(fileName)
 }
 
 /**
- * Activity中使用打开文件选择
+ * Activity中使用打开系统相册
+ * 根据泛型类型返回结果：
+ * Uri：文件的Uri
+ * File：文件的File对象
+ * String：文件的绝对路径
+ */
+suspend inline fun <reified T : Any> FragmentActivity.openPhotoAlbum(): T? {
+    return suspendCancellableCoroutine { continuation ->
+        runCatching {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = MimeType.img
+            val fm = supportFragmentManager
+            val fragment = QFGhostFragment()
+            fragment.init(intent) {
+                val uri = it?.data
+                when (T::class.java) {
+                    File::class.java -> {
+                        val file = uri?.uriToFile()
+                        continuation.resumeWith(Result.success(file as T))
+                    }
+                    Uri::class.java -> {
+                        continuation.resumeWith(Result.success(uri as T))
+                    }
+                    String::class.java -> {
+                        val file = uri?.uriToFile()
+                        continuation.resumeWith(Result.success(file?.absolutePath as T))
+                    }
+                    else -> {
+                        Log.e("FileExt", "openFile: Result only support File,Uri,String!")
+                        continuation.resumeWith(Result.success(null))
+                    }
+                }
+                fm.beginTransaction().remove(fragment).commitAllowingStateLoss()
+            }
+            fm.beginTransaction().add(fragment, QFGhostFragment::class.java.simpleName).commitAllowingStateLoss()
+        }.onFailure {
+            it.printStackTrace()
+            continuation.resumeWith(Result.success(null))
+        }
+    }
+}
+
+/**
+ * Fragment中使用打开系统相册
+ */
+suspend inline fun <reified T : Any> Fragment.openPhotoAlbum(): T? {
+    val activity = requireActivity()
+    return activity.openPhotoAlbum()
+}
+
+/**
+ * Activity中使用打开系统文件选择
  * 根据泛型类型返回结果：
  * Uri：文件的Uri
  * File：文件的File对象
@@ -158,21 +201,15 @@ suspend inline fun <reified T : Any> Fragment.openFile(mimeTypes: List<String> =
  * @param uri content://URI格式的Uri文件
  * @param width 宽，用于计算裁剪比例
  * @param height 高，用于计算裁剪比例
- * @param isSave 是否保存至相册，默认true
  * @param fileName 裁剪后的文件名，默认为空 取时间戳.png
  */
-suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width: Int, height: Int, isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width: Int, height: Int, fileName: String? = null): T? {
     return suspendCancellableCoroutine { continuation ->
         runCatching {
             val name = fileName ?: "${System.currentTimeMillis()}.png"
-            val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                File(getExternalOrFilesDir(Environment.DIRECTORY_PICTURES), name)
-            } else {
-                File("${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}", name)
-            }
-            val crop_uri = Uri.fromFile(file)
+            val cropUri = createUriInPublicDir(name, Environment.DIRECTORY_PICTURES)
             val intentCrop = Intent("com.android.camera.action.CROP")
-            intentCrop.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intentCrop.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             intentCrop.setDataAndType(uri, "image/*")
             //下面这个crop=true是设置在开启的Intent中设置显示的VIEW可裁剪
             intentCrop.putExtra("crop", "true")
@@ -192,20 +229,21 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
             intentCrop.putExtra("noFaceDetection", true)
             //设置输出的格式
             intentCrop.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString())
-            intentCrop.putExtra(MediaStore.EXTRA_OUTPUT, crop_uri)
+            intentCrop.putExtra(MediaStore.EXTRA_OUTPUT, cropUri)
+            //uri.grantPermissions(this, intentCrop)
             val fm = supportFragmentManager
             val fragment = QFGhostFragment()
             fragment.init(intentCrop) {
-                if (isSave) file.saveToAlbum()
+                //if (isSave) file.saveToAlbum()
                 when (T::class.java) {
                     File::class.java -> {
-                        continuation.resumeWith(Result.success(file as T))
+                        continuation.resumeWith(Result.success(cropUri.uriToFile() as T))
                     }
                     Uri::class.java -> {
-                        continuation.resumeWith(Result.success(file.getFileUri() as T))
+                        continuation.resumeWith(Result.success(cropUri as T))
                     }
                     String::class.java -> {
-                        continuation.resumeWith(Result.success(file.absolutePath as T))
+                        continuation.resumeWith(Result.success(cropUri.uriToFile()?.absolutePath as T))
                     }
                     else -> {
                         Log.e("FileExt", "gotoCamera:Result only support File,Uri,String!")
@@ -222,27 +260,25 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
     }
 }
 
-suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, width: Int, height: Int, isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, width: Int, height: Int, fileName: String? = null): T? {
     val activity = requireActivity()
-    return activity.startCrop<T>(uri, width, height, isSave, fileName)
+    return activity.startCrop(uri, width, height, fileName)
 }
 
 /**
  * Activity中使用原生自由裁剪
  * width&height同时设置为-1，则是自由裁剪
  * @param uri content://URI格式的Uri文件
- * @param width 宽，用于计算裁剪比例
- * @param height 高，用于计算裁剪比例
  * @param isSave 是否保存至相册，默认true
  * @param fileName 裁剪后的文件名，默认为空 取时间戳.png
  */
-suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, isSave: Boolean = true, fileName: String? = null): T? {
-    return startCrop<T>(uri, -1, -1, isSave, fileName)
+suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, fileName: String? = null): T? {
+    return startCrop(uri, -1, -1, fileName)
 }
 
-suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, isSave: Boolean = true, fileName: String? = null): T? {
+suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, fileName: String? = null): T? {
     val activity = requireActivity()
-    return activity.startCrop<T>(uri, isSave, fileName)
+    return activity.startCrop(uri, fileName)
 }
 
 
@@ -540,7 +576,7 @@ fun File?.saveToAlbum(): Boolean {
 }
 
 /**
- * 判断公有目录文件否存在，自Android Q开始，公有目录File API都失效，不能直接通过new File(path).exists();判断公有目录文件是否存在
+ * 判断Uri是否存在
  */
 fun Uri?.isFileExists(): Boolean {
     QFHelper.assertNotInit()
@@ -559,10 +595,56 @@ fun Uri?.isFileExists(): Boolean {
 
 /**
  * 文件是否存在作用域内
+ * 根据/Android/data/包名来判断，未必完全正确
  */
 fun String.isExistScope(): Boolean {
     QFHelper.assertNotInit()
     return this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
+}
+
+/**
+ * Uri授权，感觉没啥用
+ */
+fun Uri?.grantPermissions(context: Context, intent: Intent) {
+    this ?: return
+    val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+    for (resolveInfo in resInfoList) {
+        val packageName = resolveInfo.activityInfo.packageName
+        context.grantUriPermission(packageName, this, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+}
+
+
+/**
+ * 创建用于保存在公有目录的文件uri
+ * @param name 文件名
+ * @param dir 公有文件目录
+ *  @see android.os.Environment.DIRECTORY_DOWNLOADS
+ * @see android.os.Environment.DIRECTORY_DCIM,
+ * @see android.os.Environment.DIRECTORY_MUSIC,
+ * @see android.os.Environment.DIRECTORY_PODCASTS,
+ * @see android.os.Environment.DIRECTORY_RINGTONES,
+ * @see android.os.Environment.DIRECTORY_ALARMS,
+ * @see android.os.Environment.DIRECTORY_NOTIFICATIONS,
+ * @see android.os.Environment.DIRECTORY_PICTURES,
+ * @see android.os.Environment.DIRECTORY_MOVIES,
+ * @see android.os.Environment.DIRECTORY_DOCUMENTS
+ * @return uri
+ */
+fun Context.createUriInPublicDir(name: String, dir: String = Environment.DIRECTORY_DOCUMENTS): Uri? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val contentValues = ContentValues() //内容
+        val resolver = contentResolver //内容解析器
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name) //文件名
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/*") //文件类型
+        //存放picture目录
+        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, dir)
+        resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+    } else {
+        val file = File("${Environment.getExternalStorageDirectory().absolutePath}/${dir}", name)
+        file.createNewFile()
+        Uri.fromFile(file)
+    }
 }
 
 
@@ -616,6 +698,7 @@ fun Context.getExternalOrCacheDir(): File {
 fun Context.getExternalOrCacheDirPath(): String {
     return getExternalOrCacheDir().absolutePath
 }
+
 
 /**
  * 在缓存目录下新键子目录

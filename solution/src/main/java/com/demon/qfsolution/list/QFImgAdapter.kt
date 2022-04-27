@@ -16,7 +16,7 @@ import com.demon.qfsolution.loader.QFImgLoader
 /**
  * @author DeMon
  * Created on 2020/11/3.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc:
  */
 class QFImgAdapter constructor(private var imgList: MutableList<QFImgBean>, private var listener: ImgPickedListener? = null) : RecyclerView.Adapter<QFImgAdapter.ViewHolder>() {

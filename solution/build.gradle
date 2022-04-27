@@ -13,8 +13,6 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.core:core-ktx:$ktxVersion"
     implementation "androidx.appcompat:appcompat:$appcompatVersion"
     implementation "com.google.android.material:material:$materialVersion"

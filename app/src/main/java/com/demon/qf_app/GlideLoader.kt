@@ -12,7 +12,7 @@ import com.demon.qfsolution.loader.IQFImgLoader
 /**
  * @author DeMon
  * Created on 2020/11/5.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc:
  */
 class GlideLoader : IQFImgLoader {
@@ -22,18 +22,18 @@ class GlideLoader : IQFImgLoader {
      * 例如Glide中的thumbnail方法
      */
     override fun displayThumbnail(img: ImageView, uri: Uri) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL)
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).centerCrop().sizeMultiplier(0.5f)
         //thumbnail缩略图
-        Glide.with(img).asBitmap().thumbnail(0.5f).apply(options).load(uri).into(img)
+        Glide.with(img).asBitmap().apply(options).load(uri).into(img)
     }
 
     override fun displayImgUri(img: ImageView, uri: Uri) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL).diskCacheStrategy(DiskCacheStrategy.ALL)
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL)
         Glide.with(img).asBitmap().apply(options).load(uri).into(img)
     }
 
     override fun displayImgString(img: ImageView, str: String) {
-        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL).diskCacheStrategy(DiskCacheStrategy.ALL)
+        val options = RequestOptions().error(R.drawable.ic_qf_img).placeholder(R.drawable.ic_qf_img).override(Target.SIZE_ORIGINAL)
         Glide.with(img).asBitmap().apply(options).load(str).into(img)
     }
 }

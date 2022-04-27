@@ -18,13 +18,20 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
-    var uri: Uri? = null
+
+    private var uri: Uri? = null
+
+    private val adapter by lazy {
+        ImgAdapter()
+    }
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.rvImgs.adapter = adapter
 
         PermissionX.init(this)
             .permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
@@ -38,18 +45,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.btn1.setOnClickListener {
             launchUI {
-                uri = openFile<String>(arrayListOf(MimeType.img))?.run {
-                    File(this).toUri()
+                uri = openPhotoAlbum()
+                Log.i(TAG, "openPhotoAlbum: $uri")
+                uri?.run {
+                    adapter.datas = mutableListOf(this)
                 }
-                Log.i(TAG, "onCreate: $uri")
-                binding.img.setImageURI(uri)
             }
         }
         binding.btn2.setOnClickListener {
             launchUI {
-                uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
+                uri = gotoCamera("DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
-                binding.img.setImageURI(uri)
+                uri?.run {
+                    adapter.datas = mutableListOf(this)
+                }
             }
         }
         binding.btn3.setOnClickListener {
@@ -64,15 +73,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.btn31.setOnClickListener {
             launchUI {
-                val uris = QFHelper
+                QFHelper
                     .isNeedGif(false)
                     .isNeedCamera(true)
                     .setSpanCount(3)
                     .setLoadNum(30)
                     .setMaxNum(9)
-                    .startScopeUri(this)
-
-                Log.i(TAG, "onCreate: startScopeUri=$uris")
+                    .startScopeUri(this)?.run {
+                        uri = this[0]
+                        Log.i(TAG, "onCreate: startScopeUri=$this")
+                        adapter.datas = this.toMutableList()
+                    }
             }
         }
 
@@ -81,7 +92,9 @@ class MainActivity : AppCompatActivity() {
                 uri?.run {
                     uri = startCrop(this, 300, 300)
                     Log.i(TAG, "startCrop: $uri")
-                    binding.img.setImageURI(uri)
+                    uri?.run {
+                        adapter.datas = mutableListOf(this)
+                    }
                 }
             }
         }
@@ -90,10 +103,13 @@ class MainActivity : AppCompatActivity() {
                 uri?.run {
                     uri = startCrop(this)
                     Log.i(TAG, "startCrop: $uri")
-                    binding.img.setImageURI(uri)
+                    uri?.run {
+                        adapter.datas = mutableListOf(this)
+                    }
                 }
             }
         }
+
         binding.btn6.setOnClickListener {
             var fragment = supportFragmentManager.findFragmentByTag(MainFragment::class.java.simpleName)
             if (fragment == null) {
@@ -110,15 +126,13 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getResult(data)
-                    uris?.run {
-                        uri = this[0]
-                        Log.i(TAG, "onActivityResult: $uri")
-                        binding.img.setImageURI(uri)
+                    QFHelper.getResult(data)?.run {
+                        adapter.datas = this.toMutableList()
                     }
                 }
             }
         }
     }
+
 
 }

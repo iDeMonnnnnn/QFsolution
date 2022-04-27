@@ -22,7 +22,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 /**
  * @author DeMon
  * Created on 2020/11/4.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc:
  */
 @SuppressLint("StaticFieldLeak")
@@ -144,7 +144,7 @@ object QFHelper {
     }
 
     /**
-     * 携程打开简易图片库
+     * 协程打开简易图片库，返回文件uri集合
      */
     suspend fun startScopeUri(activity: FragmentActivity): ArrayList<Uri>? {
         if (assertCheck(activity)) return null
@@ -155,6 +155,11 @@ object QFHelper {
         }
     }
 
+    suspend fun startScopeUri(fragment: Fragment): ArrayList<Uri>? = startScopeUri(fragment.requireActivity())
+
+    /**
+     * 协程打开简易图片库，返回文件路径集合
+     */
     suspend fun startScopePath(activity: FragmentActivity): ArrayList<String>? {
         if (assertCheck(activity)) return null
         return suspendCancellableCoroutine { continuation ->
@@ -169,8 +174,6 @@ object QFHelper {
             }
         }
     }
-
-    suspend fun startScopeUri(fragment: Fragment): ArrayList<Uri>? = startScopeUri(fragment.requireActivity())
 
     suspend fun startScopePath(fragment: Fragment): ArrayList<String>? = startScopePath(fragment.requireActivity())
 

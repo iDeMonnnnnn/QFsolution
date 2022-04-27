@@ -20,14 +20,20 @@ import java.io.File
 /**
  * @author DeMon
  * Created on 2020/11/5.
- * E-mail 757454343@qq.com
+ * E-mail idemon_liu@qq.com
  * Desc:
  */
 class MainFragment : DialogFragment() {
 
     private val TAG = "MainFragment"
     private lateinit var binding: ActivityMainBinding
-    var uri: Uri? = null
+
+    private var uri: Uri? = null
+
+    private val adapter by lazy {
+        ImgAdapter()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = ActivityMainBinding.inflate(layoutInflater, container, false)
         return binding.root
@@ -40,21 +46,25 @@ class MainFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        binding.rvImgs.adapter = adapter
         binding.btn1.setOnClickListener {
             launchUI {
                 uri = openFile<String>(arrayListOf(MimeType.img))?.run {
                     File(this).toUri()
                 }
                 Log.i(TAG, "onCreate: $uri")
-                binding.img.setImageURI(uri)
+                uri?.run {
+                    adapter.datas = mutableListOf(this)
+                }
             }
         }
         binding.btn2.setOnClickListener {
             launchUI {
                 uri = gotoCamera(fileName = "DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "onCreate: $uri")
-                binding.img.setImageURI(uri)
+                uri?.run {
+                    adapter.datas = mutableListOf(this)
+                }
             }
         }
         binding.btn3.setOnClickListener {
@@ -69,23 +79,27 @@ class MainFragment : DialogFragment() {
 
         binding.btn31.setOnClickListener {
             launchUI {
-                val uris = QFHelper
+                QFHelper
                     .isNeedGif(false)
                     .isNeedCamera(true)
                     .setSpanCount(3)
                     .setLoadNum(30)
                     .setMaxNum(9)
-                    .startScopeUri(this)
-
-                Log.i(TAG, "onCreate: startScopeUri=$uris")
+                    .startScopeUri(this)?.run {
+                        Log.i(TAG, "onCreate: startScopeUri=$this")
+                        adapter.datas = this.toMutableList()
+                    }
             }
         }
 
         binding.btn4.setOnClickListener {
             launchUI {
                 uri?.run {
-                    uri = startCrop(this, 300, 600)
-                    binding.img.setImageURI(uri)
+                    uri = startCrop(this, 300, 300)
+                    Log.i(TAG, "startCrop: $uri")
+                    uri?.run {
+                        adapter.datas = mutableListOf(this)
+                    }
                 }
             }
         }
@@ -94,7 +108,9 @@ class MainFragment : DialogFragment() {
                 uri?.run {
                     uri = startCrop(this)
                     Log.i(TAG, "startCrop: $uri")
-                    binding.img.setImageURI(uri)
+                    uri?.run {
+                        adapter.datas = mutableListOf(this)
+                    }
                 }
             }
         }
@@ -107,15 +123,11 @@ class MainFragment : DialogFragment() {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             when (requestCode) {
                 0x001 -> {
-                    val uris = QFHelper.getResult(data)
-                    uris?.run {
-                        uri = this[0]
-                        binding.img.setImageURI(uri)
+                    QFHelper.getResult(data)?.run {
+                        adapter.datas = this.toMutableList()
                     }
                 }
             }
-            //Log.i(TAG, "onActivityResult: $requestCode  $uri  ${uri.uriToFile(this)}")
-            //img.setImageURI(uri)
         }
     }
 }
