@@ -225,7 +225,7 @@ object QFHelper {
         return data?.getParcelableArrayListExtra(EXTRA_RESULT)
     }
 
-    fun assertCheck(context: Context): Boolean {
+    private fun assertCheck(context: Context): Boolean {
         if (maxNum < 1) {
             Toast.makeText(context, context.getString(R.string.qf_less_one), Toast.LENGTH_LONG).show()
             return true

@@ -1,4 +1,4 @@
-## QFsolution - 适用于AndroidQ的文件操作解决方案
+## QFsolution - 适用于AndroidQ及以上的文件操作解决方案
 
 [![](https://jitpack.io/v/iDeMonnnnnn/QFsolution.svg)](https://jitpack.io/#iDeMonnnnnn/QFsolution)
 
@@ -8,8 +8,33 @@
 4. **最新已兼容至Android12**
 
 ### 开始使用
-
 **使用详情可见[文档WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
+
+#### 添加依赖
+```
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
+[latest_version](https://github.com/iDeMonnnnnn/QFsolution/releases)
+```
+dependencies {
+	implementation 'com.github.iDeMonnnnnn:QFsolution:$latest_version'
+}
+```
+
+#### 添加权限
+```
+    <!--如果你使用相机相关功能必须要添加，否则可忽略-->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!--存储权限在低于AndroidQ的手机上还是需要的-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+```
+
 
 **更多使用示例，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)**
 

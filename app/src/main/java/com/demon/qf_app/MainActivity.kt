@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             launchUI {
                 val path = gotoCamera<String>("DeMon-${System.currentTimeMillis()}.jpg")
                 Log.i(TAG, "gotoCamera: $path =")
-                //binding.ivImg.setImageURI(uri)
+                uri = File(path).getFileUri()
                 Glide.with(binding.ivImg).load(path).into(binding.ivImg)
             }
         }
