@@ -36,9 +36,15 @@ dependencies {
 ```
 
 
-**更多使用示例，请见[Demo示例](https://github.com/iDeMonnnnnn/QFsolution/tree/master/app)**
+#### 更多使用
 
-更多使用细节，可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
+请见[Demo示例代码](https://github.com/iDeMonnnnnn/QFsolution/blob/master/app/src/main/java/com/demon/qf_app/MainActivity.kt)
+
+可见[源码注释](https://github.com/iDeMonnnnnn/QFsolution/blob/master/solution/src/main/java/com/demon/qfsolution/utils/QFileExt.kt)，写的很详细。
+
+### 使用体验
+
+
 
 
 ### 其他

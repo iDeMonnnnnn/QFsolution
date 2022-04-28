@@ -50,20 +50,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.btn2.setOnClickListener {
             launchUI {
-                uri = openPhotoAlbum()
+                val path = openPhotoAlbum<String>()
+                uri = File(path).getFileUri()
                 Log.i(TAG, "openPhotoAlbum: $uri")
                 binding.ivImg.setImageURI(uri)
             }
         }
         binding.btn3.setOnClickListener {
             launchUI {
-                val path = gotoCamera<String>("DeMon-${System.currentTimeMillis()}.jpg")
-                Log.i(TAG, "gotoCamera: $path =")
-                uri = File(path).getFileUri()
-                Glide.with(binding.ivImg).load(path).into(binding.ivImg)
+                val file = gotoCamera<File>("DeMon-${System.currentTimeMillis()}.jpg")
+                Log.i(TAG, "gotoCamera: ${file?.absolutePath} =")
+                uri = file?.getFileUri()
+                binding.ivImg.setImageURI(uri)
             }
         }
-
 
         binding.btn4.setOnClickListener {
             launchUI {
@@ -87,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         binding.btn6.setOnClickListener {
             startActivity(Intent(this, ImgBrowseActivity::class.java))
         }
-
 
     }
 
