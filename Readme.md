@@ -46,7 +46,7 @@ dependencies {
 
 [demo.apk](https://github.com/iDeMonnnnnn/QFsolution/raw/master/QFsolution.apk)
 
-<img src="https://github.com/iDeMonnnnnn/QFsolution/raw/master/demo.gif" alt="这是一张网络图片" height="500" width="300">
+<img src="https://github.com/iDeMonnnnnn/QFsolution/raw/master/demo.gif" alt="这是一张网络图片" height="600" width="300">
 
 
 ### 其他
