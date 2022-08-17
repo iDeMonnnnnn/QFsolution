@@ -90,4 +90,34 @@ object MimeType {
     const val _wps = "application/vnd.ms-works"
     const val _xml = "text/plain"
     const val _z = "application/x-compress"
+
 }
+
+fun String.isWord() = this == MimeType.doc || this == MimeType.docx
+
+fun String.isPPT() = this == MimeType.ppt || this == MimeType.pptx
+
+fun String.isExcel() = this == MimeType.xls || this == MimeType.xlsx
+
+fun String.isImage() = this.startsWith("image/")
+
+fun String.isGif() = this == MimeType._gif
+
+fun String.isVideo() = this.startsWith("video/")
+
+fun String.isAudio() = this.startsWith("audio/")
+
+fun String.isTxt() = this.startsWith("text/")
+
+fun String.isPdf() = this == MimeType.pdf
+
+fun String.isApk() = this == MimeType.apk
+
+fun String.isZip() = this == MimeType.zip
+        || this == MimeType._tar
+        || this == MimeType._tgz
+        || this == MimeType._z
+        || this == MimeType._gtar
+        || this == MimeType._gz
+
+

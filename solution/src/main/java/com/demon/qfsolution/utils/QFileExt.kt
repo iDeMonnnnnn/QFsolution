@@ -553,12 +553,6 @@ fun Uri.saveFileByUri(): File? {
 }
 
 /**
- * 根据MimeType获取拓展名
- */
-fun String.getExtensionByMimeType() =
-    MimeTypeMap.getSingleton().getExtensionFromMimeType(this)
-
-/**
  * 将图片保存至相册，兼容AndroidQ
  */
 fun File?.saveToAlbum(): Boolean {
@@ -798,6 +792,20 @@ fun Uri.getMimeTypeByUri(): String? {
     return QFHelper.context.contentResolver.getType(this)
 }
 
+
+/**
+ * 根据MimeType获取拓展名
+ */
+fun String.getExtensionByMimeType(): String {
+    var ext = ""
+    runCatching {
+        ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(this) ?: ""
+    }.onFailure {
+        it.printStackTrace()
+    }
+    return ext
+}
+
 /**
  * 根据Uri获取扩展名
  */
@@ -813,6 +821,13 @@ fun String.getExtensionByFileName() =
 /**
  * 根据文件名获取MimeType
  */
-fun String.getMimeTypeByFileName(): String =
-    URLConnection.getFileNameMap().getContentTypeFor(this)
+fun String.getMimeTypeByFileName(): String {
+    var mimeType = ""
+    runCatching {
+        mimeType = URLConnection.getFileNameMap().getContentTypeFor(this)
+    }.onFailure {
+        it.printStackTrace()
+    }
+    return mimeType
+}
 
