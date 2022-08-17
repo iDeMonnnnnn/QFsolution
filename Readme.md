@@ -6,6 +6,7 @@
 2. **基于协程的系统文件选择，相册选择，系统拍照，系统裁剪。**
 3. **Uri转为File的究极解决方案。**
 4. **最新已兼容至Android12**
+5. **兼容```Intent.ACTION_OPEN_DOCUMENT_TREE```选择文件夹Uri获取后路径**
 
 ### 开始使用
 **使用详情可见[文档WIKI](https://github.com/iDeMonnnnnn/QFsolution/wiki)**
@@ -33,6 +34,8 @@ dependencies {
     <!--存储权限在低于AndroidQ的手机上还是需要的-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--AndroidR及以上手机上访问sd卡需要存储管理的特殊权限->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 ```
 
 

@@ -321,55 +321,6 @@ fun Uri?.uriToFile(): File? {
 }
 
 /**
- * fileProvider
- */
-fun File.getFileUri(): Uri {
-    QFHelper.assertNotInit()
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        FileProvider.getUriForFile(QFHelper.context, "${QFHelper.context.packageName}.${QFHelper.authorities}", this)
-    } else {
-        Uri.fromFile(this)
-    }
-}
-
-/**
- * 根据Uri将文件保存File到沙盒中
- * 此方法能解决部分Uri无法获取到File的问题
- * 但是会造成文件冗余，可以根据实际情况，决定是否需要删除
- */
-fun Uri.saveFileByUri(): File? {
-    QFHelper.assertNotInit()
-    //文件夹uri，不复制直接return null
-    if (isDirectory()) return null
-    try {
-        val inputStream = QFHelper.context.contentResolver.openInputStream(this)
-        val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
-        val file = File(QFHelper.context.getCacheChildDir(null), fileName)
-        if (!file.exists()) {
-            file.createNewFile()
-        }
-        val fos = FileOutputStream(file)
-        val bis = BufferedInputStream(inputStream)
-        val bos = BufferedOutputStream(fos)
-        val byteArray = ByteArray(1024)
-        var bytes = bis.read(byteArray)
-        while (bytes > 0) {
-            bos.write(byteArray, 0, bytes)
-            bos.flush()
-            bytes = bis.read(byteArray)
-        }
-        bos.close()
-        fos.close()
-        return file
-    } catch (e: FileNotFoundException) {
-        e.printStackTrace()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return null
-}
-
-/**
  * 根据Uri获取File，AndroidQ及以上可用
  * AndroidQ中只有沙盒中的文件可以直接根据绝对路径获取File，非沙盒环境是无法根据绝对路径访问的
  * 因此先判断Uri是否是沙盒中的文件，如果是直接拼接绝对路径访问，否则使用[saveFileByUri]复制到沙盒中生成File
@@ -393,14 +344,11 @@ fun Uri.getFileFromUriQ(): File? {
  */
 fun Uri.getFileFromUriN(): File? {
     QFHelper.assertNotInit()
-    var file: File? = null
+    var file = getFileFromMedia()
     val uri = this
-    if (file == null) {
-        file = getFileFromMedia()
-    }
+    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
     val authority = uri.authority
     val path = uri.path
-    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
     /**
      * fileProvider{@xml/file_paths}授权的Uri
      */
@@ -461,7 +409,7 @@ fun Uri.getFileFromMedia(): File? {
 }
 
 /**
- * 处理DocumentUri
+ * Intent.ACTION_OPEN_DOCUMENT选择的文件Uri
  */
 fun Uri.getFileFromDocuments(): File? {
     grantPermissions(QFHelper.context)
@@ -556,48 +504,53 @@ fun Uri?.getDataColumn(): String? {
 }
 
 /**
- * 判断uri是否是文件夹
+ * fileProvider
  */
-fun Uri.isDirectory(): Boolean {
-    val paths: List<String> = pathSegments
-    return paths.size >= 2 && "tree" == paths[0]
-
-}
-
-/**
- * 根据Uri获取文件名
- */
-fun Uri.getFileName(): String? {
+fun File.getFileUri(): Uri {
     QFHelper.assertNotInit()
-    val documentFile = DocumentFile.fromSingleUri(QFHelper.context, this)
-    return documentFile?.name
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        FileProvider.getUriForFile(QFHelper.context, "${QFHelper.context.packageName}.${QFHelper.authorities}", this)
+    } else {
+        Uri.fromFile(this)
+    }
 }
 
 /**
- * 根据Uri获取MimeType
+ * 根据Uri将文件保存File到沙盒中
+ * 此方法能解决部分Uri无法获取到File的问题
+ * 但是会造成文件冗余，可以根据实际情况，决定是否需要删除
  */
-fun Uri.getMimeTypeByUri(): String? {
+fun Uri.saveFileByUri(): File? {
     QFHelper.assertNotInit()
-    return QFHelper.context.contentResolver.getType(this)
+    //文件夹uri，不复制直接return null
+    if (isDirectory()) return null
+    try {
+        val inputStream = QFHelper.context.contentResolver.openInputStream(this)
+        val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
+        val file = File(QFHelper.context.getCacheChildDir(null), fileName)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        val fos = FileOutputStream(file)
+        val bis = BufferedInputStream(inputStream)
+        val bos = BufferedOutputStream(fos)
+        val byteArray = ByteArray(1024)
+        var bytes = bis.read(byteArray)
+        while (bytes > 0) {
+            bos.write(byteArray, 0, bytes)
+            bos.flush()
+            bytes = bis.read(byteArray)
+        }
+        bos.close()
+        fos.close()
+        return file
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
 }
-
-/**
- * 根据Uri获取扩展名
- */
-fun Uri.getExtensionByUri() =
-    this.getMimeTypeByUri()?.getExtensionByMimeType()
-
-/**
- * 根据文件名获取扩展名
- */
-fun String.getExtensionByFileName() =
-    this.getMimeTypeByFileName().getExtensionByMimeType()
-
-/**
- * 根据文件名获取MimeType
- */
-fun String.getMimeTypeByFileName(): String =
-    URLConnection.getFileNameMap().getContentTypeFor(this)
 
 /**
  * 根据MimeType获取拓展名
@@ -645,7 +598,7 @@ fun File?.saveToAlbum(): Boolean {
 
 
 /**
- * Uri授权，解决Android12和部分手机裁剪后无法保存的问题
+ * Uri授权，解决Android12和部分手机Uri无法读取访问问题
  */
 fun Uri?.grantPermissions(context: Context, intent: Intent = Intent()) {
     this ?: return
@@ -818,3 +771,48 @@ fun Uri.isDownloadsDocument() = "com.android.providers.downloads.documents" == t
  * Uri是否在多媒体中
  */
 fun Uri.isMediaDocument() = "com.android.providers.media.documents" == this.authority
+
+/**
+ * 判断uri是否是文件夹
+ */
+fun Uri.isDirectory(): Boolean {
+    val paths: List<String> = pathSegments
+    return paths.size >= 2 && "tree" == paths[0]
+
+}
+
+/**
+ * 根据Uri获取文件名
+ */
+fun Uri.getFileName(): String? {
+    QFHelper.assertNotInit()
+    val documentFile = DocumentFile.fromSingleUri(QFHelper.context, this)
+    return documentFile?.name
+}
+
+/**
+ * 根据Uri获取MimeType
+ */
+fun Uri.getMimeTypeByUri(): String? {
+    QFHelper.assertNotInit()
+    return QFHelper.context.contentResolver.getType(this)
+}
+
+/**
+ * 根据Uri获取扩展名
+ */
+fun Uri.getExtensionByUri() =
+    this.getMimeTypeByUri()?.getExtensionByMimeType()
+
+/**
+ * 根据文件名获取扩展名
+ */
+fun String.getExtensionByFileName() =
+    this.getMimeTypeByFileName().getExtensionByMimeType()
+
+/**
+ * 根据文件名获取MimeType
+ */
+fun String.getMimeTypeByFileName(): String =
+    URLConnection.getFileNameMap().getContentTypeFor(this)
+
