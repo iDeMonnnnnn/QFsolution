@@ -17,6 +17,12 @@
         android:text="系统文件选择" />
 
     <Button
+        android:id="@+id/btn11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择文件夹" />
+
+    <Button
         android:id="@+id/btn2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

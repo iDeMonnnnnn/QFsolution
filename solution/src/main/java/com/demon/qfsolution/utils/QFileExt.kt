@@ -109,14 +109,18 @@ suspend inline fun <reified T : Any> FragmentActivity.openPhotoAlbum(): T? {
                 when (T::class.java) {
                     File::class.java -> {
                         val file = uri?.uriToFile()
-                        continuation.resumeWith(Result.success(file as T))
+                        file?.run {
+                            continuation.resumeWith(Result.success(this as T))
+                        } ?: continuation.resumeWith(Result.success(null))
                     }
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
                     String::class.java -> {
                         val file = uri?.uriToFile()
-                        continuation.resumeWith(Result.success(file?.absolutePath as T))
+                        file?.run {
+                            continuation.resumeWith(Result.success(absolutePath as T))
+                        } ?: continuation.resumeWith(Result.success(null))
                     }
                     else -> {
                         Log.e("FileExt", "openFile: Result only support File,Uri,String!")
@@ -167,14 +171,18 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<S
                 when (T::class.java) {
                     File::class.java -> {
                         val file = uri?.uriToFile()
-                        continuation.resumeWith(Result.success(file as T))
+                        file?.run {
+                            continuation.resumeWith(Result.success(this as T))
+                        } ?: continuation.resumeWith(Result.success(null))
                     }
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
                     String::class.java -> {
                         val file = uri?.uriToFile()
-                        continuation.resumeWith(Result.success(file?.absolutePath as T))
+                        file?.run {
+                            continuation.resumeWith(Result.success(absolutePath as T))
+                        } ?: continuation.resumeWith(Result.success(null))
                     }
                     else -> {
                         Log.e("FileExt", "openFile: Result only support File,Uri,String!")
@@ -331,6 +339,8 @@ fun File.getFileUri(): Uri {
  */
 fun Uri.saveFileByUri(): File? {
     QFHelper.assertNotInit()
+    //文件夹uri，不复制直接return null
+    if (isDirectory()) return null
     try {
         val inputStream = QFHelper.context.contentResolver.openInputStream(this)
         val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
@@ -351,6 +361,8 @@ fun Uri.saveFileByUri(): File? {
         bos.close()
         fos.close()
         return file
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -364,17 +376,9 @@ fun Uri.saveFileByUri(): File? {
  */
 fun Uri.getFileFromUriQ(): File? {
     QFHelper.assertNotInit()
-    var file: File? = null
-    if (DocumentsContract.isDocumentUri(QFHelper.context, this)) {
-        val uriId = DocumentsContract.getDocumentId(this)
-        Log.i("FileExt", "getFileFromUriQ: ${DocumentsContract.getDocumentId(this)}")
-        val split: List<String> = uriId.split(":")
-        //文件存在沙盒中，可直接拼接全路径访问
-        //判断依据目前是Android/data/包名，不够严谨
-        if (split.size > 1 && split[1].contains("Android/data/${QFHelper.context.packageName}")) {
-            //AndroidQ无法通过Environment.getExternalStorageDirectory()获取SD卡根目录，因此直接/storage/emulated/0/拼接
-            file = File("/storage/emulated/0/${split[1]}")
-        }
+    var file: File? = getFileFromMedia()
+    if (file == null) {
+        file = getFileFromDocuments()
     }
     val flag = file?.exists() ?: false
     return if (!flag) {
@@ -390,20 +394,15 @@ fun Uri.getFileFromUriQ(): File? {
 fun Uri.getFileFromUriN(): File? {
     QFHelper.assertNotInit()
     var file: File? = null
-    var uri = this
-    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
+    val uri = this
+    if (file == null) {
+        file = getFileFromMedia()
+    }
     val authority = uri.authority
     val path = uri.path
+    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
     /**
-     * media类型的Uri，形如content://media/external/images/media/11560
-     */
-    if (file == null && authority != null && authority.startsWith("media")) {
-        uri.getDataColumn()?.run {
-            file = File(this)
-        }
-    }
-    /**
-     * fileProvider授权的Uri
+     * fileProvider{@xml/file_paths}授权的Uri
      */
     if (file == null && authority != null && authority.startsWith(QFHelper.context.packageName) && path != null) {
         //这里的值来自你的provider_paths.xml，如果不同需要自己进行添加修改
@@ -429,44 +428,8 @@ fun Uri.getFileFromUriN(): File? {
     /**
      * Intent.ACTION_OPEN_DOCUMENT选择的文件Uri
      */
-    if (file == null && DocumentsContract.isDocumentUri(QFHelper.context, this)) {
-        val uriId = DocumentsContract.getDocumentId(this)
-        Log.i("FileExt", "isDocumentUri: ${DocumentsContract.getDocumentId(this)}")
-        val split: List<String> = uriId.split(":")
-        when (uri.authority) {
-            "com.android.externalstorage.documents" -> { //内部存储设备中选择
-                if (split.size > 1) file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
-            }
-            "com.android.providers.downloads.documents" -> { //下载内容中选择
-                if (uriId.startsWith("raw:")) {
-                    file = File(split[1])
-                }
-                //content://com.android.providers.downloads.documents/document/582
-            }
-            "com.android.providers.media.documents" -> { //多媒体中选择
-                var contentUri: Uri? = null
-                when (split[0]) {
-                    "image" -> {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    }
-                    "video" -> {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    }
-                    "audio" -> {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                    }
-                }
-                contentUri?.run {
-                    if (split.size > 1) {
-                        uri = ContentUris.withAppendedId(this, split[1].toLong())
-                        Log.i("FileExt", "isDocumentUri media: $uri")
-                        uri.getDataColumn()?.run {
-                            file = File(this)
-                        }
-                    }
-                }
-            }
-        }
+    if (file == null) {
+        file = getFileFromDocuments()
     }
     val flag = file?.exists() ?: false
     return if (!flag) {
@@ -475,6 +438,94 @@ fun Uri.getFileFromUriN(): File? {
         uri.saveFileByUri()
     } else {
         file
+    }
+}
+
+/**
+ * media类型的Uri，相册中选择得到的uri，
+ * 形如content://media/external/images/media/11560
+ */
+fun Uri.getFileFromMedia(): File? {
+    var file: File? = null
+    val authority = this.authority ?: "'"
+    if (authority.startsWith("media")) {
+        getDataColumn()?.run {
+            file = File(this)
+        }
+    }
+    return if (file?.exists() == true) {
+        file
+    } else {
+        null
+    }
+}
+
+/**
+ * 处理DocumentUri
+ */
+fun Uri.getFileFromDocuments(): File? {
+    grantPermissions(QFHelper.context)
+    val uriId = when {
+        DocumentsContract.isDocumentUri(QFHelper.context, this) -> {
+            Log.i("FileExt", "getFileFromDocuments: isDocumentUri")
+            DocumentsContract.getDocumentId(this)
+        }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && DocumentsContract.isTreeUri(this) -> {
+            Log.i("FileExt", "getFileFromDocuments: isTreeUri")
+            DocumentsContract.getTreeDocumentId(this)
+        }
+        else -> null
+    }
+    Log.i("FileExt", "getFileFromDocuments: $uriId")
+    uriId ?: return null
+    var file: File? = null
+    val split: List<String> = uriId.split(":")
+    if (split.size < 2) return null
+    when {
+        //文件存在沙盒中，可直接拼接全路径访问
+        //判断依据目前是Android/data/包名，不够严谨
+        split[1].contains("Android/data/${QFHelper.context.packageName}") -> {
+            file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
+        }
+        isExternalStorageDocument() -> { //内部存储设备中选择
+            if (split.size > 1) file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
+        }
+        isDownloadsDocument() -> { //下载内容中选择
+            if (uriId.startsWith("raw:")) {
+                file = File(split[1])
+            } else {
+                //MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            }
+            //content://com.android.providers.downloads.documents/document/582
+        }
+        isMediaDocument() -> { //多媒体中选择
+            var contentUri: Uri? = null
+            when (split[0]) {
+                "image" -> {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                }
+                "video" -> {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                }
+                "audio" -> {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                }
+            }
+            Log.i("FileExt", "isDocumentUri contentUri: $contentUri")
+            contentUri?.run {
+                val uri = ContentUris.withAppendedId(this, split[1].toLong())
+                Log.i("FileExt", "isDocumentUri media: $uri")
+                uri.getDataColumn()?.run {
+                    file = File(this)
+                }
+
+            }
+        }
+    }
+    return if (file?.exists() == true) {
+        file
+    } else {
+        null
     }
 }
 
@@ -500,7 +551,17 @@ fun Uri?.getDataColumn(): String? {
     } finally {
         cursor?.close()
     }
+    Log.i("FileExt", "getDataColumn: $str")
     return str
+}
+
+/**
+ * 判断uri是否是文件夹
+ */
+fun Uri.isDirectory(): Boolean {
+    val paths: List<String> = pathSegments
+    return paths.size >= 2 && "tree" == paths[0]
+
 }
 
 /**
@@ -582,37 +643,11 @@ fun File?.saveToAlbum(): Boolean {
     return false
 }
 
-/**
- * 判断Uri是否存在
- */
-fun Uri?.isFileExists(): Boolean {
-    QFHelper.assertNotInit()
-    if (this == null) return false
-    Log.i("FileExt", "isFileExists: $this")
-    var afd: AssetFileDescriptor? = null
-    return try {
-        afd = QFHelper.context.contentResolver.openAssetFileDescriptor(this, "r")
-        afd != null
-    } catch (e: FileNotFoundException) {
-        false
-    } finally {
-        afd?.close()
-    }
-}
-
-/**
- * 文件是否存在作用域内
- * 根据/Android/data/包名来判断，未必完全正确
- */
-fun String.isExistScope(): Boolean {
-    QFHelper.assertNotInit()
-    return this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
-}
 
 /**
  * Uri授权，解决Android12和部分手机裁剪后无法保存的问题
  */
-fun Uri?.grantPermissions(context: Context, intent: Intent) {
+fun Uri?.grantPermissions(context: Context, intent: Intent = Intent()) {
     this ?: return
     val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
     for (resolveInfo in resInfoList) {
@@ -741,3 +776,45 @@ fun Context.getCacheChildDir(child: String?): File {
     file.mkdirs()
     return file
 }
+
+/**
+ * 文件是否存在作用域内
+ * 根据/Android/data/包名来判断，未必完全正确
+ */
+fun String.isExistScope(): Boolean {
+    QFHelper.assertNotInit()
+    return this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
+}
+
+/**
+ * 判断Uri是否存在
+ */
+fun Uri?.isFileExists(): Boolean {
+    QFHelper.assertNotInit()
+    if (this == null) return false
+    Log.i("FileExt", "isFileExists: $this")
+    var afd: AssetFileDescriptor? = null
+    return try {
+        afd = QFHelper.context.contentResolver.openAssetFileDescriptor(this, "r")
+        afd != null
+    } catch (e: FileNotFoundException) {
+        false
+    } finally {
+        afd?.close()
+    }
+}
+
+/**
+ * Uri是否在内部存储设备中
+ */
+fun Uri.isExternalStorageDocument() = "com.android.externalstorage.documents" == this.authority
+
+/**
+ * Uri是否在下载内容中
+ */
+fun Uri.isDownloadsDocument() = "com.android.providers.downloads.documents" == this.authority
+
+/**
+ * Uri是否在多媒体中
+ */
+fun Uri.isMediaDocument() = "com.android.providers.media.documents" == this.authority
