@@ -34,7 +34,7 @@ dependencies {
     <!--存储权限在低于AndroidQ的手机上还是需要的-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!--AndroidR及以上手机上访问sd卡需要存储管理的特殊权限->
+    <!--AndroidR及以上手机上访问sd卡需要存储管理的特殊权限，非文件管理类App不建议申请->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 ```
 
