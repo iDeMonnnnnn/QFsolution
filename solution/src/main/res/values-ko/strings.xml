@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">qfsolution</string>
     <string name="qf_pick_photo">그림</string>
     <string name="qf_ok">확인</string>
     <string name="qf_ok_value">(%1d%2d)확인</string>
