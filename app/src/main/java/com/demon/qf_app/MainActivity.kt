@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "openFile: $path")
                 Glide.with(binding.ivImg).load(path).into(binding.ivImg)
                 //binding.ivImg.setImageURI(uri)
+
+                path.saveToAlbum()
             }
         }
 

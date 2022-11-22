@@ -554,15 +554,21 @@ fun Uri.saveFileByUri(): File? {
 
 /**
  * 将图片保存至相册，兼容AndroidQ
+ *
+ * @param name 图片名称
  */
-fun File?.saveToAlbum(): Boolean {
+fun File?.saveToAlbum(name: String? = null): Boolean {
     QFHelper.assertNotInit()
-    if (this == null) return false
+    if (this == null || !exists()) return false
     Log.i("FileExt", "saveToAlbum: ${this.absolutePath}")
     runCatching {
         val values = ContentValues()
         val resolver = QFHelper.context.contentResolver
-        val fileName = this.name
+        val fileName = name?.run {
+            this
+        } ?: run {
+            this.name
+        }
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
         values.put(MediaStore.MediaColumns.MIME_TYPE, fileName.getMimeTypeByFileName())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -579,8 +585,18 @@ fun File?.saveToAlbum(): Boolean {
                 input.close()
             }
         } else {
-            //AndroidQ以下直接将拍照后得到的文件路径插入多媒体中即可
-            values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
+            //作用域内的文件多媒体无法显示
+            //会抛异常：UNIQUE constraint failed: files._data (code 2067)
+            if (this.absolutePath.isAndroidDataFile()) {
+                val file = getFileInPublicDir(fileName, Environment.DIRECTORY_PICTURES)
+                //AndroidQ以下作用域的需要将文件复制到公共目录，再插入多媒体中
+                this.copyFile(file)
+                values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
+            } else {
+                //AndroidQ以下非作用域的直接将文件路径插入多媒体中即可
+                values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
+            }
+
             resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         }
         return true
@@ -588,6 +604,11 @@ fun File?.saveToAlbum(): Boolean {
         it.printStackTrace()
     }
     return false
+}
+
+fun String?.saveToAlbum(name: String? = null): Boolean {
+    this ?: return false
+    return File(this).saveToAlbum(name)
 }
 
 
@@ -725,12 +746,64 @@ fun Context.getCacheChildDir(child: String?): File {
 }
 
 /**
- * 文件是否存在作用域内
- * 根据/Android/data/包名来判断，未必完全正确
+ * 是否是当前作用域内的文件
  */
-fun String.isExistScope(): Boolean {
+fun String?.isScopeFile(): Boolean {
     QFHelper.assertNotInit()
-    return this.contains("/Android/data/${QFHelper.context.packageName}") && File(this).exists()
+    this ?: return false
+    //内部存储
+    val filesDirString = QFHelper.context.filesDir.parent
+    Log.i("FileExt", "isScopeFile: file=$this,filesDirString=$filesDirString")
+    if (!filesDirString.isNullOrEmpty() && this.contains(filesDirString)) {
+        return File(this).exists()
+    }
+    //外部存储
+    val externalFilesDirString = QFHelper.context.getExternalFilesDir(null)?.parent
+    Log.i("FileExt", "isScopeFile: file=$this,externalFilesDirString=$externalFilesDirString")
+    if (!externalFilesDirString.isNullOrEmpty() && this.contains(externalFilesDirString)) {
+        return File(this).exists()
+    }
+    return false
+}
+
+fun File?.isScopeFile(): Boolean {
+    this ?: return false
+    return this.absolutePath.isScopeFile()
+}
+
+/**
+ * 是否是以下作用域父文件夹内的文件，如华为手机：
+ * 手机内部存储：/data/user/0/
+ * 手机外部存储：/storage/emulated/0/Android/data/
+ * ps:不同手机可能不一致，主要是看filesDir，getExternalFilesDir的返回结果
+ */
+fun String?.isAndroidDataFile(): Boolean {
+    QFHelper.assertNotInit()
+    this ?: return false
+    //内部存储
+    val filesDirString = QFHelper.context.filesDir.parent
+    Log.i("FileExt", "isAndroidDataFile: file=$this,filesDirString=$filesDirString")
+    if (!filesDirString.isNullOrEmpty()) {
+        val dir = File(filesDirString).parent
+        if (!dir.isNullOrEmpty() && this.contains(dir)) {
+            return File(this).exists()
+        }
+    }
+    //外部存储
+    val externalFilesDirString = QFHelper.context.getExternalFilesDir(null)?.parent
+    Log.i("FileExt", "isAndroidDataFile: file=$this,externalFilesDirString=$externalFilesDirString")
+    if (!externalFilesDirString.isNullOrEmpty()) {
+        val dir = File(externalFilesDirString).parent
+        if (!dir.isNullOrEmpty() && this.contains(dir)) {
+            return File(this).exists()
+        }
+    }
+    return false
+}
+
+fun File?.isAndroidDataFile(): Boolean {
+    this ?: return false
+    return this.absolutePath.isAndroidDataFile()
 }
 
 /**
@@ -831,3 +904,35 @@ fun String.getMimeTypeByFileName(): String {
     return mimeType
 }
 
+/**
+ * 复制文件
+ */
+fun File?.copyFile(dest: File) {
+    this ?: return
+    var input: InputStream? = null
+    var output: OutputStream? = null
+    try {
+        if (!dest.exists()) {
+            dest.createNewFile()
+        }
+        input = FileInputStream(this)
+        output = FileOutputStream(dest)
+        val buf = ByteArray(1024)
+        var bytesRead: Int
+        while (input.read(buf).also { bytesRead = it } > 0) {
+            output.write(buf, 0, bytesRead)
+        }
+        output.flush()
+        Log.i("FileExt", "copyFile succeed: ${dest.absolutePath}")
+    } catch (e: Exception) {
+        Log.d("FileExt", "copyFile error: " + e.message)
+        e.printStackTrace()
+    } finally {
+        try {
+            input?.close()
+            output?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
