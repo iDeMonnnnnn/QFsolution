@@ -23,7 +23,7 @@ allprojects {
 [latest_version](https://github.com/iDeMonnnnnn/QFsolution/releases)
 ```
 dependencies {
-	implementation 'com.github.iDeMonnnnnn:QFsolution:$latest_version'
+	implementation 'com.github.iDeMonnnnnn:QFsolution:1.2.2'
 }
 ```
 
