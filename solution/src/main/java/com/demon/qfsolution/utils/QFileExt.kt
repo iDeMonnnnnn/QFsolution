@@ -55,7 +55,8 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(fileName: Strin
             val fragment = QFGhostFragment()
             fragment.init(intentCamera) {
                 //更新图库
-                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
+                //MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
+                file.saveToAlbum()
                 when (T::class.java) {
                     File::class.java -> {
                         continuation.resumeWith(Result.success(file as T))
@@ -596,7 +597,7 @@ fun File?.saveToAlbum(name: String? = null): Boolean {
                 //AndroidQ以下非作用域的直接将文件路径插入多媒体中即可
                 values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
             }
-
+            values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
             resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         }
         return true
@@ -640,10 +641,8 @@ fun Uri?.grantPermissions(context: Context, intent: Intent = Intent()) {
  * @see android.os.Environment.DIRECTORY_MOVIES,
  * @see android.os.Environment.DIRECTORY_DOCUMENTS
  */
-fun getFileInPublicDir(name: String, dir: String = Environment.DIRECTORY_DOCUMENTS): File {
-    return File("${Environment.getExternalStorageDirectory().absolutePath}/${dir}", name)
-
-
+fun getFileInPublicDir(name: String, type: String = Environment.DIRECTORY_DOCUMENTS): File {
+    return File(Environment.getExternalStoragePublicDirectory(type), name)
 }
 
 /**
@@ -672,7 +671,7 @@ fun Context.createUriInPublicDir(name: String, dir: String = Environment.DIRECTO
         contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, dir)
         resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
     } else {
-        val file = File("${Environment.getExternalStorageDirectory().absolutePath}/${dir}", name)
+        val file = File(Environment.getExternalStoragePublicDirectory(dir), name)
         file.createNewFile()
         Uri.fromFile(file)
     }
@@ -782,7 +781,7 @@ fun String?.isAndroidDataFile(): Boolean {
     this ?: return false
     //内部存储
     val filesDirString = QFHelper.context.filesDir.parent
-    Log.i("FileExt", "isAndroidDataFile: file=$this,filesDirString=$filesDirString")
+    //Log.i("FileExt", "isAndroidDataFile: file=$this,filesDirString=$filesDirString")
     if (!filesDirString.isNullOrEmpty()) {
         val dir = File(filesDirString).parent
         if (!dir.isNullOrEmpty() && this.contains(dir)) {
@@ -791,7 +790,7 @@ fun String?.isAndroidDataFile(): Boolean {
     }
     //外部存储
     val externalFilesDirString = QFHelper.context.getExternalFilesDir(null)?.parent
-    Log.i("FileExt", "isAndroidDataFile: file=$this,externalFilesDirString=$externalFilesDirString")
+    //Log.i("FileExt", "isAndroidDataFile: file=$this,externalFilesDirString=$externalFilesDirString")
     if (!externalFilesDirString.isNullOrEmpty()) {
         val dir = File(externalFilesDirString).parent
         if (!dir.isNullOrEmpty() && this.contains(dir)) {
