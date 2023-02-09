@@ -55,8 +55,7 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(fileName: Strin
             val fragment = QFGhostFragment()
             fragment.init(intentCamera) {
                 //更新图库
-                //MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
-                file.saveToAlbum()
+                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), null, null)
                 when (T::class.java) {
                     File::class.java -> {
                         continuation.resumeWith(Result.success(file as T))
@@ -597,7 +596,6 @@ fun File?.saveToAlbum(name: String? = null): Boolean {
                 //AndroidQ以下非作用域的直接将文件路径插入多媒体中即可
                 values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
             }
-            values.put(MediaStore.MediaColumns.DATA, this.absolutePath)
             resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         }
         return true
