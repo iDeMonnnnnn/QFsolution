@@ -60,12 +60,15 @@ suspend inline fun <reified T : Any> FragmentActivity.gotoCamera(fileName: Strin
                     File::class.java -> {
                         continuation.resumeWith(Result.success(file as T))
                     }
+
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
+
                     String::class.java -> {
                         continuation.resumeWith(Result.success(file.absolutePath as T))
                     }
+
                     else -> {
                         Log.e("FileExt", "gotoCamera:Result only support File,Uri,String!")
                         continuation.resumeWith(Result.success(null))
@@ -113,15 +116,18 @@ suspend inline fun <reified T : Any> FragmentActivity.openPhotoAlbum(): T? {
                             continuation.resumeWith(Result.success(this as T))
                         } ?: continuation.resumeWith(Result.success(null))
                     }
+
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
+
                     String::class.java -> {
                         val file = uri?.uriToFile()
                         file?.run {
                             continuation.resumeWith(Result.success(absolutePath as T))
                         } ?: continuation.resumeWith(Result.success(null))
                     }
+
                     else -> {
                         Log.e("FileExt", "openFile: Result only support File,Uri,String!")
                         continuation.resumeWith(Result.success(null))
@@ -175,15 +181,18 @@ suspend inline fun <reified T : Any> FragmentActivity.openFile(mimeTypes: List<S
                             continuation.resumeWith(Result.success(this as T))
                         } ?: continuation.resumeWith(Result.success(null))
                     }
+
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(uri as T))
                     }
+
                     String::class.java -> {
                         val file = uri?.uriToFile()
                         file?.run {
                             continuation.resumeWith(Result.success(absolutePath as T))
                         } ?: continuation.resumeWith(Result.success(null))
                     }
+
                     else -> {
                         Log.e("FileExt", "openFile: Result only support File,Uri,String!")
                         continuation.resumeWith(Result.success(null))
@@ -254,12 +263,15 @@ suspend inline fun <reified T : Any> FragmentActivity.startCrop(uri: Uri, width:
                     File::class.java -> {
                         continuation.resumeWith(Result.success(cropUri.uriToFile() as T))
                     }
+
                     Uri::class.java -> {
                         continuation.resumeWith(Result.success(cropUri as T))
                     }
+
                     String::class.java -> {
                         continuation.resumeWith(Result.success(cropUri.uriToFile()?.absolutePath as T))
                     }
+
                     else -> {
                         Log.e("FileExt", "gotoCamera:Result only support File,Uri,String!")
                         continuation.resumeWith(Result.success(null))
@@ -307,6 +319,7 @@ fun Uri?.uriToFile(): File? {
         ContentResolver.SCHEME_FILE -> {
             File(this.path)
         }
+
         ContentResolver.SCHEME_CONTENT -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 getFileFromUriQ()
@@ -314,6 +327,7 @@ fun Uri?.uriToFile(): File? {
                 getFileFromUriN()
             }
         }
+
         else -> {
             File(toString())
         }
@@ -418,10 +432,12 @@ fun Uri.getFileFromDocuments(): File? {
             Log.i("FileExt", "getFileFromDocuments: isDocumentUri")
             DocumentsContract.getDocumentId(this)
         }
+
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && DocumentsContract.isTreeUri(this) -> {
             Log.i("FileExt", "getFileFromDocuments: isTreeUri")
             DocumentsContract.getTreeDocumentId(this)
         }
+
         else -> null
     }
     Log.i("FileExt", "getFileFromDocuments: $uriId")
@@ -435,38 +451,43 @@ fun Uri.getFileFromDocuments(): File? {
         split[1].contains("Android/data/${QFHelper.context.packageName}") -> {
             file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
         }
+
         isExternalStorageDocument() -> { //内部存储设备中选择
             if (split.size > 1) file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
         }
-        isDownloadsDocument() -> { //下载内容中选择
-            if (uriId.startsWith("raw:")) {
-                file = File(split[1])
-            } else {
-                //MediaStore.Downloads.EXTERNAL_CONTENT_URI
-            }
-            //content://com.android.providers.downloads.documents/document/582
-        }
+
+//        isDownloadsDocument() -> { //下载内容中选择
+//            if (uriId.startsWith("raw:")) {
+//                file = File(split[1])
+//            } else {
+//                //MediaStore.Downloads.EXTERNAL_CONTENT_URI
+//            }
+//            Log.i("FileExt", "isDownloadsDocument ${file?.absolutePath}")
+//            //content://com.android.providers.downloads.documents/document/582
+//        }
+
         isMediaDocument() -> { //多媒体中选择
             var contentUri: Uri? = null
             when (split[0]) {
                 "image" -> {
                     contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 }
+
                 "video" -> {
                     contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                 }
+
                 "audio" -> {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 }
             }
-            Log.i("FileExt", "isDocumentUri contentUri: $contentUri")
+            Log.i("FileExt", "isMediaDocument contentUri: $contentUri")
             contentUri?.run {
                 val uri = ContentUris.withAppendedId(this, split[1].toLong())
-                Log.i("FileExt", "isDocumentUri media: $uri")
+                Log.i("FileExt", "isMediaDocument media: $uri")
                 uri.getDataColumn()?.run {
                     file = File(this)
                 }
-
             }
         }
     }
@@ -614,12 +635,16 @@ fun String?.saveToAlbum(name: String? = null): Boolean {
 /**
  * Uri授权，解决Android12和部分手机Uri无法读取访问问题
  */
-fun Uri?.grantPermissions(context: Context, intent: Intent = Intent()) {
+fun Uri?.grantPermissions(context: Context, intent: Intent? = null) {
     this ?: return
-    val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-    for (resolveInfo in resInfoList) {
-        val packageName = resolveInfo.activityInfo.packageName
-        context.grantUriPermission(packageName, this, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    if (intent == null) {
+        context.grantUriPermission(context.packageName, this, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    } else {
+        val resInfoList = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            context.grantUriPermission(packageName, this, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
     }
 }
 
