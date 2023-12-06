@@ -59,12 +59,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.btn1.setOnClickListener {
             launchUI {
-                val path = openFile<String>() ?: ""
-                Log.i(TAG, "openFile: $path")
+                val file = openFile<File>()
+                file ?: return@launchUI
+                Log.i(TAG, "openFile:${file.canRead()}=${file.absolutePath}")
                 //Glide.with(binding.ivImg).load(path).into(binding.ivImg)
                 //binding.ivImg.setImageURI(uri)
 
-                FileUtils.readText(path)
+                FileUtils.readText(file.absolutePath)
                 //path.saveToAlbum()
             }
         }

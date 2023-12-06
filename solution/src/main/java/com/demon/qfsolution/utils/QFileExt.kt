@@ -345,8 +345,7 @@ fun Uri.getFileFromUriQ(): File? {
     if (file == null) {
         file = getFileFromDocuments()
     }
-    val flag = file?.exists() ?: false
-    return if (!flag) {
+    return if (!file.isFileExists()) {
         this.saveFileByUri()
     } else {
         file
@@ -393,8 +392,7 @@ fun Uri.getFileFromUriN(): File? {
     if (file == null) {
         file = getFileFromDocuments()
     }
-    val flag = file?.exists() ?: false
-    return if (!flag) {
+    return if (!file.isFileExists()) {
         //形如content://com.android.providers.downloads.documents/document/582的下载内容中的文件
         //无法根据Uri获取到真实路径的文件，统一使用saveFileByUri()方法获取File
         uri.saveFileByUri()
@@ -415,7 +413,7 @@ fun Uri.getFileFromMedia(): File? {
             file = File(this)
         }
     }
-    return if (file?.exists() == true) {
+    return if (file.isFileExists()) {
         file
     } else {
         null
@@ -456,15 +454,15 @@ fun Uri.getFileFromDocuments(): File? {
             if (split.size > 1) file = File("${Environment.getExternalStorageDirectory().absolutePath}/${split[1]}")
         }
 
-//        isDownloadsDocument() -> { //下载内容中选择
-//            if (uriId.startsWith("raw:")) {
-//                file = File(split[1])
-//            } else {
-//                //MediaStore.Downloads.EXTERNAL_CONTENT_URI
-//            }
-//            Log.i("FileExt", "isDownloadsDocument ${file?.absolutePath}")
-//            //content://com.android.providers.downloads.documents/document/582
-//        }
+        isDownloadsDocument() -> { //下载内容中选择
+            if (uriId.startsWith("raw:")) {
+                file = File(split[1])
+            } else {
+                //MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            }
+            Log.i("FileExt", "isDownloadsDocument ${file?.absolutePath}")
+            //content://com.android.providers.downloads.documents/document/582
+        }
 
         isMediaDocument() -> { //多媒体中选择
             var contentUri: Uri? = null
@@ -491,7 +489,9 @@ fun Uri.getFileFromDocuments(): File? {
             }
         }
     }
-    return if (file?.exists() == true) {
+    file ?: return null
+
+    return if (file.isFileExists()) {
         file
     } else {
         null
@@ -580,7 +580,7 @@ fun Uri.saveFileByUri(): File? {
  */
 fun File?.saveToAlbum(name: String? = null): Boolean {
     QFHelper.assertNotInit()
-    if (this == null || !exists()) return false
+    if (this == null || !isFileExists()) return false
     Log.i("FileExt", "saveToAlbum: ${this.absolutePath}")
     runCatching {
         val values = ContentValues()
@@ -826,6 +826,14 @@ fun String?.isAndroidDataFile(): Boolean {
 fun File?.isAndroidDataFile(): Boolean {
     this ?: return false
     return this.absolutePath.isAndroidDataFile()
+}
+
+/**
+ * 判断一个文件是否存在&&可读
+ */
+fun File?.isFileExists(): Boolean {
+    this ?: return false
+    return exists() && canRead()
 }
 
 /**
