@@ -41,15 +41,18 @@ object QFHelper {
 
     lateinit var context: Context
 
+    var isLog = false
+
     /**
      * @param context 提供一个全局的Context
      * @param authorities 设置FileProvider的authorities,默认"fileProvider"
      */
     @JvmStatic
     @JvmOverloads
-    fun init(@NonNull context: Context, @NonNull authorities: String = "fileProvider") {
+    fun init(@NonNull context: Context, isLog: Boolean = false, @NonNull authorities: String = "fileProvider") {
         this.context = context
         this.authorities = authorities
+        this.isLog = isLog
     }
 
     /**

@@ -314,7 +314,7 @@ suspend inline fun <reified T : Any> Fragment.startCrop(uri: Uri, fileName: Stri
  */
 fun Uri?.uriToFile(): File? {
     this ?: return null
-    Log.i("FileExt", "uriToFile: $this")
+    qFilelog("uriToFile: $this")
     return when (scheme) {
         ContentResolver.SCHEME_FILE -> {
             File(this.path)
@@ -359,7 +359,7 @@ fun Uri.getFileFromUriN(): File? {
     QFHelper.assertNotInit()
     var file = getFileFromMedia()
     val uri = this
-    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
+    qFilelog("getFileFromUriN: $uri ${uri.authority} ${uri.path}")
     val authority = uri.authority
     val path = uri.path
     /**
@@ -427,18 +427,18 @@ fun Uri.getFileFromDocuments(): File? {
     grantPermissions(QFHelper.context)
     val uriId = when {
         DocumentsContract.isDocumentUri(QFHelper.context, this) -> {
-            Log.i("FileExt", "getFileFromDocuments: isDocumentUri")
+            qFilelog("getFileFromDocuments: isDocumentUri")
             DocumentsContract.getDocumentId(this)
         }
 
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && DocumentsContract.isTreeUri(this) -> {
-            Log.i("FileExt", "getFileFromDocuments: isTreeUri")
+            qFilelog("getFileFromDocuments: isTreeUri")
             DocumentsContract.getTreeDocumentId(this)
         }
 
         else -> null
     }
-    Log.i("FileExt", "getFileFromDocuments: $uriId")
+    qFilelog("getFileFromDocuments: $uriId")
     uriId ?: return null
     var file: File? = null
     val split: List<String> = uriId.split(":")
@@ -460,7 +460,7 @@ fun Uri.getFileFromDocuments(): File? {
             } else {
                 //MediaStore.Downloads.EXTERNAL_CONTENT_URI
             }
-            Log.i("FileExt", "isDownloadsDocument ${file?.absolutePath}")
+            qFilelog("isDownloadsDocument ${file?.absolutePath}")
             //content://com.android.providers.downloads.documents/document/582
         }
 
@@ -479,10 +479,10 @@ fun Uri.getFileFromDocuments(): File? {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 }
             }
-            Log.i("FileExt", "isMediaDocument contentUri: $contentUri")
+            qFilelog("isMediaDocument contentUri: $contentUri")
             contentUri?.run {
                 val uri = ContentUris.withAppendedId(this, split[1].toLong())
-                Log.i("FileExt", "isMediaDocument media: $uri")
+                qFilelog("isMediaDocument media: $uri")
                 uri.getDataColumn()?.run {
                     file = File(this)
                 }
@@ -520,7 +520,7 @@ fun Uri?.getDataColumn(): String? {
     } finally {
         cursor?.close()
     }
-    Log.i("FileExt", "getDataColumn: $str")
+    qFilelog("getDataColumn: $str")
     return str
 }
 
@@ -581,7 +581,7 @@ fun Uri.saveFileByUri(): File? {
 fun File?.saveToAlbum(name: String? = null): Boolean {
     QFHelper.assertNotInit()
     if (this == null || !isFileExists()) return false
-    Log.i("FileExt", "saveToAlbum: ${this.absolutePath}")
+    qFilelog("saveToAlbum: ${this.absolutePath}")
     runCatching {
         val values = ContentValues()
         val resolver = QFHelper.context.contentResolver
@@ -775,13 +775,13 @@ fun String?.isScopeFile(): Boolean {
     this ?: return false
     //内部存储
     val filesDirString = QFHelper.context.filesDir.parent
-    Log.i("FileExt", "isScopeFile: file=$this,filesDirString=$filesDirString")
+    qFilelog("isScopeFile: file=$this,filesDirString=$filesDirString")
     if (!filesDirString.isNullOrEmpty() && this.contains(filesDirString)) {
         return File(this).exists()
     }
     //外部存储
     val externalFilesDirString = QFHelper.context.getExternalFilesDir(null)?.parent
-    Log.i("FileExt", "isScopeFile: file=$this,externalFilesDirString=$externalFilesDirString")
+    qFilelog("isScopeFile: file=$this,externalFilesDirString=$externalFilesDirString")
     if (!externalFilesDirString.isNullOrEmpty() && this.contains(externalFilesDirString)) {
         return File(this).exists()
     }
@@ -804,7 +804,7 @@ fun String?.isAndroidDataFile(): Boolean {
     this ?: return false
     //内部存储
     val filesDirString = QFHelper.context.filesDir.parent
-    //Log.i("FileExt", "isAndroidDataFile: file=$this,filesDirString=$filesDirString")
+    //qFilelog( "isAndroidDataFile: file=$this,filesDirString=$filesDirString")
     if (!filesDirString.isNullOrEmpty()) {
         val dir = File(filesDirString).parent
         if (!dir.isNullOrEmpty() && this.contains(dir)) {
@@ -813,7 +813,7 @@ fun String?.isAndroidDataFile(): Boolean {
     }
     //外部存储
     val externalFilesDirString = QFHelper.context.getExternalFilesDir(null)?.parent
-    //Log.i("FileExt", "isAndroidDataFile: file=$this,externalFilesDirString=$externalFilesDirString")
+    //qFilelog( "isAndroidDataFile: file=$this,externalFilesDirString=$externalFilesDirString")
     if (!externalFilesDirString.isNullOrEmpty()) {
         val dir = File(externalFilesDirString).parent
         if (!dir.isNullOrEmpty() && this.contains(dir)) {
@@ -833,7 +833,9 @@ fun File?.isAndroidDataFile(): Boolean {
  */
 fun File?.isFileExists(): Boolean {
     this ?: return false
-    return exists() && canRead()
+    val eacces = exists() && canRead()
+    qFilelog("isFileExists: $absolutePath=$eacces")
+    return eacces
 }
 
 /**
@@ -842,7 +844,7 @@ fun File?.isFileExists(): Boolean {
 fun Uri?.isFileExists(): Boolean {
     QFHelper.assertNotInit()
     if (this == null) return false
-    Log.i("FileExt", "isFileExists: $this")
+    qFilelog("isFileExists: $this")
     var afd: AssetFileDescriptor? = null
     return try {
         afd = QFHelper.context.contentResolver.openAssetFileDescriptor(this, "r")
@@ -953,9 +955,9 @@ fun File?.copyFile(dest: File) {
             output.write(buf, 0, bytesRead)
         }
         output.flush()
-        Log.i("FileExt", "copyFile succeed: ${dest.absolutePath}")
+        qFilelog("copyFile succeed: ${dest.absolutePath}")
     } catch (e: Exception) {
-        Log.d("FileExt", "copyFile error: " + e.message)
+        qFilelog("copyFile error: " + e.message)
         e.printStackTrace()
     } finally {
         try {
@@ -964,5 +966,12 @@ fun File?.copyFile(dest: File) {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+}
+
+
+fun qFilelog(msg: String?) {
+    if (QFHelper.isLog) {
+        Log.i("QFile", "$msg")
     }
 }
